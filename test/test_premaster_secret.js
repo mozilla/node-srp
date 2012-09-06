@@ -11,7 +11,7 @@ const vows = require('vows'),
 
 const I = "alice",
       P = "password123",
-      s = bigint('BEB25379 D1A8581E B5A72767 3A2441EE', 16);
+      s = bigint('BEB25379 D1A8581E B5A72767 3A2441EE', 16),
       N = params['1024'].N,
       g = params['1024'].g,
       k_expected = bigint('7556AA04 5AEF2CDD 07ABAF0F 665C3E81 8913186F', 16),
