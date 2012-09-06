@@ -57,12 +57,22 @@ vows.describe('RFC 5054')
 
     "k": function(v) {
       var k = srp.getk(N, g, 'sha1');
-      console.log(k);
+      console.log("k expected:", k_expected.toString(16));
+      console.log("k actually:", k.toString(16));
       assert(k_expected.eq(k));
 
     },
+
+    "a": function() {
+      assert(A_expected.eq(srp.getA(g, a, N)));
+    },
+
     "b": function(v) {
       assert(B_expected.eq(srp.getB(v, g, b, N, 'sha1')));
+    },
+
+    "u": function() {
+      assert(u_expected.eq(srp.getu(A_expected, B_expected, N, 'sha1')));
     }
 
   }
