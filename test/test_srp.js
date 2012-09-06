@@ -70,8 +70,15 @@ vows.describe('RFC 5054')
 
     "u": function() {
       assert(u_expected.eq(srp.getu(A_expected, B_expected, N, 'sha1')));
-    }
+    },
 
+    "client premaster secret": function() {
+      assert(premaster_secret.eq(srp.clientPremasterSecret(s, I, P, N, g, a, B_expected, 'sha1')));
+    },
+
+    "server premaster secret": function(v) {
+      assert(premaster_secret.eq(srp.serverPremasterSecret(s, v, N, g, A_expected, b, 'sha1')));
+    },
   }
 })
 
