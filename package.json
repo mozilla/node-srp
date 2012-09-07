@@ -3,7 +3,10 @@
   "description": "Secure Remote Password (SRP)",
   "version": "0.0.1",
 
+  "main": "index.js",
+
   "scripts": {
+    "start": "./app.js",
     "test": "vows test/*.js --spec"
   },
 
