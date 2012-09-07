@@ -26,6 +26,8 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.post('/create', routes.create);
+app.post('/hello', routes.hello);
+app.post('/exchange', routes.exchange);
 
 if (!module.parent) {
   http.createServer(app).listen(app.get('port'), function(){
