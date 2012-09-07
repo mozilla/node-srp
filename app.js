@@ -6,16 +6,17 @@ var express = require('express'),
     path = require('path'),
     config = require('./lib/config');
 
-var app = express();
+var app = module.exports = express.createServer();
 
 app.configure(function(){
-  app.set('port', config.get('server').port);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
+  //app.use(express.cookieParser('ATTACK AT DAWN!!! no seriously, make me a config'));
+  //app.use(express.session());
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
 });
@@ -30,7 +31,7 @@ app.post('/hello', routes.hello);
 app.post('/exchange', routes.exchange);
 
 if (!module.parent) {
-  http.createServer(app).listen(app.get('port'), function(){
-    console.log("SRP server listening on port " + app.get('port'));
+  app.listen(config.get('server').port, function(){
+    console.log("SRP server listening on port " + app.address().port);
   });
 }
