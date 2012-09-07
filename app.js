@@ -26,7 +26,7 @@ app.configure('development', function(){
 app.get('/', routes.index);
 app.post('/create', routes.create);
 app.post('/hello', routes.hello);
-app.post('/exchange', routes.exchange);
+app.post('/confirm', routes.confirm);
 
 if (!module.parent) {
   app.listen(config.get('server').port, function(){
