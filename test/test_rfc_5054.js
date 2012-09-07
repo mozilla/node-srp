@@ -46,7 +46,7 @@ vows.describe('RFC 5054')
 .addBatch({
   "Test vectors": {
     topic: function() {
-      return srp.getV(s, I, P, N, g, 'sha1');
+      return srp.getv(s, I, P, N, g, 'sha1');
     },
 
     "V": function(v) {
