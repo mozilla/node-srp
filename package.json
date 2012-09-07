@@ -9,6 +9,7 @@
 
   "dependencies": {
     "bigint": "0.3.9",
+    "convict": "0.0.6",
     "express": "3.0.0rc4",
     "jade": "0.27.2",
     "put": "0.0.6"

@@ -1,7 +1,7 @@
 const vows = require('vows'),
       assert = require('assert'),
       bigint = require('bigint'),
-      params = require('../parameters'),
+      params = require('../lib/params'),
       srp = require('../lib/srp');
 
 /*
