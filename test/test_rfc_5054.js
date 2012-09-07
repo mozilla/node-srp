@@ -35,8 +35,7 @@ const I = "alice",
                          +'EB4012B7 D7665238 A8E3FB00 4B117B58', 16),
 
       u_expected = bigint('CE38B959 3487DA98 554ED47D 70A7AE5F 462EF019', 16),
-      premaster_secret = bigint(
-                          'B0DC82BA BCF30674 AE450C02 87745E79 90A3381F 63B387AA F271A10D'
+      S_expected = bigint('B0DC82BA BCF30674 AE450C02 87745E79 90A3381F 63B387AA F271A10D'
                          +'233861E3 59B48220 F7C4693C 9AE12B0A 6F67809F 0876E2D0 13800D6C'
                          +'41BB59B6 D5979B5C 00A172B4 A2A5903A 0BDCAF8A 709585EB 2AFAFA8F'
                          +'3499B200 210DCC1F 10EB3394 3CD67FC8 8A2F39A4 BE5BEC4E C0A3212D'
@@ -71,12 +70,12 @@ vows.describe('RFC 5054')
       assert(u_expected.eq(srp.getu(A_expected, B_expected, N, 'sha1')));
     },
 
-    "client premaster secret": function() {
-      assert(premaster_secret.eq(srp.clientPremasterSecret(s, I, P, N, g, a, B_expected, 'sha1')));
+    "S client": function() {
+      assert(S_expected.eq(srp.client_getS(s, I, P, N, g, a, B_expected, 'sha1')));
     },
 
-    "server premaster secret": function(v) {
-      assert(premaster_secret.eq(srp.serverPremasterSecret(s, v, N, g, A_expected, b, 'sha1')));
+    "S server": function(v) {
+      assert(S_expected.eq(srp.server_getS(s, v, N, g, A_expected, b, 'sha1')));
     }
   }
 })
