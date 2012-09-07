@@ -68,6 +68,44 @@ hash is taken to obscure any structure that may be visible in `S`.)
 Now Carol and Steve must convince each other that their values for `K`
 match.
 
+##Glossary of Terms
+
+`N` a large prime number
+
+`g` a generator
+
+`H` a secure hashing function
+
+`|` the concatenation operator
+
+`PAD` a function that left-pads a block of bytes with zeroes until it is the same length as `N`
+
+`I` the identity of the client (a string)
+
+`P` the password of the client (a string)
+
+`s` some random salt (a string)
+
+`v` the verifier
+
+`k` a multiplier
+
+`u` a scrambling parameter
+
+`a` an ephemeral private key known to the client
+
+`A` the public key from `a`
+
+`b` an ephemeral private key known to the server
+
+`B` the public key from `b`
+
+`x` an intermediate value, `H(s | H(I | ":" | P))`
+
+`S` the session key
+
+`K` a hash of the session key shared between client and server
+
 ##License
 
 MIT
