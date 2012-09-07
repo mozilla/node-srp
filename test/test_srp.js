@@ -1,4 +1,3 @@
-
 const vows = require('vows'),
       assert = require('assert'),
       bigint = require('bigint'),
