@@ -1,18 +1,41 @@
 #SRP - Secure Remote Password
 
-Implementation of the [SRP Authentication and Key Exchange System](http://tools.ietf.org/html/rfc2945).
+This is a work in progress.
 
-http://tools.ietf.org/html/rfc5054
+Implementation of the [SRP Authentication and Key Exchange
+System](http://tools.ietf.org/html/rfc2945) and protocols in [Secure
+Remote Password (SRP) Protocol for TLS
+Authentication](http://tools.ietf.org/html/rfc5054) (including the
+test vectors in the latter).
 
-Work in progress.
+The goals are to provide
 
-Want to support:
+- [done] SRP function library that passes [RFC 5054 tests](http://tools.ietf.org/html/rfc5054#appendix-B)
+- [done] SRP server
+- [done] SRP test client
+- SRP client lib for Node.js
+- JavaScript browser client
 
-- [done] srp function library that passes http://tools.ietf.org/html/rfc5054#appendix-B tests
-- srp server
-- javascript browser client
+##Prerequisites
 
-##Initial Setup
+[GNU libgmp](http://gmplib.org/) for those big big numbers.
+
+- debian: `libgmp3-dev`
+- brew: `gmp`
+
+##Installation
+
+`git clone` this archive.
+
+In the `node-srp` dir, run `npm install`.
+
+##Tests
+
+In the `node-srp` dir, run `npm test`.
+
+##Protocol
+
+###Initial Setup
 
 Carol the Client wants to share messages with Steve the server.
 
@@ -33,7 +56,7 @@ Steve stores `I`, `s`, and `v`.  Carol remembers `P`.  This sequence
 is performed once, after which Carol and Steve can use the SRP
 protocol to share messages.
 
-##Message Protocol
+###Message Protocol
 
 First, Carol generates an ephemeral private key `a`.  She computes the
 public key `A` as `g^a % N`.  She sends Steve `I` and `A`.
@@ -74,7 +97,7 @@ it to Steve.  If he gets the same result when hashing his session key
 twice, he hashes his session key once and sends it back to Carol, who
 can check if she wishes that she gets the same value.
 
-##Glossary of Terms
+###Glossary of Terms
 
 `N` a large prime number
 
