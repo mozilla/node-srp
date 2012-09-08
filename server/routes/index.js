@@ -22,20 +22,21 @@ exports.index = function(req, res){
 
 /*
  * Create a new account on the server, storing identity, salt, and verifier.
- * The password is discarded.
  *
- * TODO provide a secure way to do this from the client
+ * Required params:
+ *     identity (string)          the user's identity
+ *     salt (string)              unique salt
+ *     verifier (string)          hex-encoded verifier
  *
  * returns: 200 OK on success
  */
 exports.create = function(req, res) {
   var I = req.body.identity;
-  var P = req.body.password;
-  var N_bits = req.body.N_bits || config.get('N_bits');
-  var N = params[N_bits].N;
-  var g = params[N_bits].g;
-  var alg = req.body.alg_name || config.get('alg_name');
-  if (! (I && P && N && g && alg)) {
+  var v = bigint(req.body.verifier, 16);
+  var s = req.body.salt;
+  var N_bits = req.body.N_bits;
+  var alg = req.body.alg_name;
+  if (! (I && v && s && N_bits && alg)) {
     return res.json(400);
   }
 
@@ -43,15 +44,9 @@ exports.create = function(req, res) {
     // account exists?
     if (data) return res.json(400);
 
-    crypto.randomBytes(config.get('s_bytes'), function(err, buf) {
+    db.store(I, {s: s, v: v, N_bits: N_bits, alg: alg}, function(err) {
       if (err) return res.json(500);
-      // base 60 alphanumeric string from buffer
-      var s = bigint.fromBuffer(buf).toString(60);
-      var v = srp.getv(s, I, P, N, g, alg);
-      db.store(I, {s: s, v: v, N_bits: N_bits, alg: alg}, function(err) {
-        if (err) return res.json(500);
-        return res.json(200);
-      });
+      return res.json(200);
     });
   });
 };
@@ -105,7 +100,6 @@ exports.hello = function(req, res) {
         S: S,
         alg: alg
       };
-
       return res.json(200, {salt: s, ephemeral_pubkey: B.toString(16)});
     });
   });
@@ -137,6 +131,7 @@ exports.confirm = function(req, res) {
   function H (string_or_buf) {
     return crypto.createHash(i.alg).update(string_or_buf).digest('hex');
   }
+
   var hhk = H(H(i.S.toBuffer()));
   if (hhk === HHK) {
     return res.json(200, {challenge: H(i.S.toBuffer())});

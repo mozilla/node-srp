@@ -12,7 +12,7 @@ Want to support:
 - srp server
 - javascript browser client
 
-##Procedure
+##Initial Setup
 
 Carol the Client wants to share messages with Steve the server.
 
@@ -21,16 +21,19 @@ Carol and Steve agree on a large random number `N` and a generator
 their implementations.  They also agree on a cryptographic hashing
 function `H`.
 
-First, Steve generates some random salt, `s`.  Carol establishes a
-password `P`.  Carol computes the verifier `v` as `g ^ H(s | H(I | ':'
-| P)) % N`, where `I` is Carol's identity, and `|` denotes
+Carol establishes a password and remembers it well.  She the generates
+some random salt, `s`, and compputes the verifier `v` as `g ^ H(s |
+H(I | ':' | P)) % N`, where `I` is Carol's identity, and `|` denotes
 concatenation.
 
-Steve stores `I`, `s`, and `v`.  Carol remembers `p`.  This sequence
+Carol then sends Steve `I`, `s`, and `v`.  She also sends the size of
+`N` and the name of the hashing algorithm she has chosen.
+
+Steve stores `I`, `s`, and `v`.  Carol remembers `P`.  This sequence
 is performed once, after which Carol and Steve can use the SRP
 protocol to share messages.
 
-##Message Flow
+##Message Protocol
 
 First, Carol generates an ephemeral private key `a`.  She computes the
 public key `A` as `g^a % N`.  She sends Steve `I` and `A`.

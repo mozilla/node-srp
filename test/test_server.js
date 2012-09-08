@@ -12,6 +12,7 @@ const I = "Kevin Phillips-Bong";
 const P = "slightly silly";
 const ALG_NAME = 'sha256';
 const KEY_SIZE = '4096';
+const SALT_BYTES = 32;
 
 function H (string_or_buf) {
   return crypto.createHash(ALG_NAME).update(string_or_buf).digest('hex');
@@ -48,9 +49,18 @@ vows.describe('server')
 .addBatch({
   "Account": {
     topic: function() {
+      var cb = this.callback;
       var uri = 'http://localhost:' + port + '/create';
-      var params = {form: {identity: I, password: P, alg_name: ALG_NAME, N_bits: KEY_SIZE}};
-      request.post(uri, params, this.callback);
+      // generate s and compute v; send to server
+      crypto.randomBytes(SALT_BYTES, function(err, buf) {
+        var N = params[KEY_SIZE].N;
+        var g = params[KEY_SIZE].g;
+        var s = bigint.fromBuffer(buf).toString(60);
+        var v = srp.getv(s, I, P, N, g, ALG_NAME).toString(16);
+        var data = {form: {identity: I, verifier: v, salt: s,
+                           alg_name: ALG_NAME, N_bits: KEY_SIZE}};
+        request.post(uri, data, cb);
+      });
     },
 
     "creation": function(err, res, body) {
@@ -68,8 +78,8 @@ vows.describe('server')
           a = key;
           A = srp.getA(g, a, N);
           var uri = 'http://localhost:' + port + '/hello';
-          var params = {form: {identity: I, ephemeral_pubkey: A.toString(16)}};
-          request.post(uri, params, cb);
+          var data = {form: {identity: I, ephemeral_pubkey: A.toString(16)}};
+          request.post(uri, data, cb);
         });
       },
 
@@ -88,8 +98,8 @@ vows.describe('server')
           S = srp.client_getS(s, I, P, N, g, a, B, ALG_NAME);
           var hhk = H(H(S.toBuffer()));
           var uri = 'http://localhost:' + port + '/confirm';
-          var params = {form: {identity: I, challenge: hhk}};
-          request.post(uri, params, this.callback);
+          var data = {form: {identity: I, challenge: hhk}};
+          request.post(uri, data, this.callback);
         },
 
         "is confirmed on the server for the client": function(err, res, body) {
