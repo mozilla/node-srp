@@ -1,6 +1,6 @@
 #SRP - Secure Remote Password
 
-This is a work in progress.
+This is a work in progress.  I'm trying to figure some stuff out with it.
 
 Implementation of the [SRP Authentication and Key Exchange
 System](http://tools.ietf.org/html/rfc2945) and protocols in [Secure
@@ -8,13 +8,19 @@ Remote Password (SRP) Protocol for TLS
 Authentication](http://tools.ietf.org/html/rfc5054) (including the
 test vectors in the latter).
 
-The goals are to provide
+The goals are to provide at a minimum:
 
 - [done] SRP function library that passes [RFC 5054 tests](http://tools.ietf.org/html/rfc5054#appendix-B)
 - [done] SRP server
 - [done] SRP test client
 - SRP client lib for Node.js
 - JavaScript browser client
+
+Additionally, I would like the API to provide:
+
+- A way to bind messages of intent to the session key in a way that
+  preserves integrity, confidentiality, and protects against replay
+  attacks.
 
 ##Prerequisites
 
@@ -38,6 +44,7 @@ In the `node-srp` dir, run `npm test`.
 ###Initial Setup
 
 Carol the Client wants to share messages with Steve the server.
+Before this can happen, they need to perform a one-time setup step.
 
 Carol and Steve agree on a large random number `N` and a generator
 `g`.  These can be published in advance or better yet hard-coded in
