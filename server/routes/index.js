@@ -1,10 +1,10 @@
 const crypto = require('crypto'),
       bigint = require('bigint'),
-      config = require('../lib/config'),
-      params = require('../lib/params'),
+      config = require('../../lib/config'),
+      params = require('../../lib/params'),
       S_BYTES = config.get('s_bytes'),
-      db = require('../lib/db'),
-      srp = require('../lib/srp');
+      db = require('../../lib/db'),
+      srp = require('../../lib/srp');
 
 var sessions = {};
 

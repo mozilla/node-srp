@@ -6,7 +6,7 @@ const vows = require('vows'),
       params = require('../lib/params'),
       http = require('http'),
       request = require('request'),
-      app = require('../app');
+      app = require('../server/server');
 
 const I = "Kevin Phillips-Bong";
 const P = "slightly silly";

@@ -4,7 +4,7 @@ var express = require('express'),
     routes = require('./routes'),
     http = require('http'),
     path = require('path'),
-    config = require('./lib/config');
+    config = require('../lib/config');
 
 var app = module.exports = express.createServer();
 
