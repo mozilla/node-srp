@@ -142,6 +142,13 @@ can check if she wishes that she gets the same value.
 
 `K` a hash of the session key shared between client and server
 
+##Resources
+
+- [The Stanford SRP Homepage](http://srp.stanford.edu/)
+- RFC 2945: [The SRP Authentication and Key Exchange System](http://tools.ietf.org/html/rfc2945)
+- RFC 5054: [Using the Secure Remote Password (SRP) Protocol for TLS Authentication](http://tools.ietf.org/html/rfc5054)
+- Wikipedia: [The Secure Remote Password protocol](http://en.wikipedia.org/wiki/Secure_Remote_Password_protocol)
+
 ##License
 
 MIT
