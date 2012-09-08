@@ -35,7 +35,7 @@ protocol to share messages.
 First, Carol generates an ephemeral private key `a`.  She computes the
 public key `A` as `g^a % N`.  She sends Steve `I` and `A`.
 
-1. Client sends `I`, `A`
+Client sends `I`, `A`.
 
 Steve looks up `v` and `s`.  Steve generates an ephemeral private key
 `b` and computes the public key `B` as `k * v + g^b % N`, where `k` is
@@ -43,7 +43,7 @@ Steve looks up `v` and `s`.  Steve generates an ephemeral private key
 string with zeroes until it is the same size as `N`.)  Steve sends `s`
 and `B`.
 
-2. Server replies with `s` and `B`
+Server replies with `s` and `B`.
 
 Both now compute the scrambling parameter `u` as `u = H(PAD(A) | PAD(B))`.
 
@@ -56,7 +56,7 @@ For Carol, the formula is:
 S_client = (B - k * g^x) ^ (a + u * x)
 ```
 
-For Steve, the formula is: 
+For Steve, the formula is:
 
 ```
 S_server = (A * v ^ u) ^ b
@@ -66,7 +66,10 @@ They both now compute the shared session key, `K`, as `H(S)`.  (The
 hash is taken to obscure any structure that may be visible in `S`.)
 
 Now Carol and Steve must convince each other that their values for `K`
-match.
+match.  Here, Carol hashes and hashes again her session key and sends
+it to Steve.  If he gets the same result when hashing his session key
+twice, he hashes his session key once and sends it back to Carol, who
+can check if she wishes that she gets the same value.
 
 ##Glossary of Terms
 
