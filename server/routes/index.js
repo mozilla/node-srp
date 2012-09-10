@@ -8,6 +8,13 @@ const crypto = require('crypto'),
 
 var sessions = {};
 
+function generateSessionId(callback) {
+  srp.genKey(32, function(err, key) {
+    if (err) return callback(err);
+    return callback(null, key.toString(60));
+  });
+}
+
 /*
  * GET home page.
  */
@@ -63,6 +70,7 @@ exports.create = function(req, res) {
  * Returns:
  *     salt (string)              stored salt for identity
  *     ephemeral_pubkey (string)  hex-encoded key (B)
+ *     session_id (string)        session id
  */
 
 exports.hello = function(req, res) {
@@ -88,19 +96,28 @@ exports.hello = function(req, res) {
 
     srp.genKey(function(err, b) {
       if (err) return res.json(500);
-      var B = srp.getB(v, g, b, N, alg);
-      var u = srp.getu(A, B, N, alg);
-      var S = srp.server_getS(s, v, N, g, A, b, alg);
 
-      sessions[I] = {
-        v: v,
-        b: b,
-        B: B,
-        u: u,
-        S: S,
-        alg: alg
-      };
-      return res.json(200, {salt: s, ephemeral_pubkey: B.toString(16)});
+      generateSessionId(function(err, key) {
+        if (err) return res.json(500);
+
+        var B = srp.getB(v, g, b, N, alg);
+        var u = srp.getu(A, B, N, alg);
+        var S = srp.server_getS(s, v, N, g, A, b, alg);
+
+        sessions[I + ':' + key] = {
+          v: v,
+          b: b,
+          B: B,
+          u: u,
+          S: S,
+          alg: alg
+        };
+
+        return res.json(200, {
+          salt: s,
+          ephemeral_pubkey: B.toString(16),
+          session_id: key});
+      });
     });
   });
 };
@@ -112,6 +129,7 @@ exports.hello = function(req, res) {
  *
  * Required params:
  *     identity (string)          the user's identity
+ *     session_id (string)        session id (from /hello)
  *     challenge (string)         hex-encoded double-hashed key (H(H(K)))
  *
  * Returns:
@@ -119,11 +137,12 @@ exports.hello = function(req, res) {
  */
 exports.confirm = function(req, res) {
   var I = req.body.identity;
+  var key = req.body.session_id || '';
   var HHK = req.body.challenge;
-  var i = sessions[I];
+  var i = sessions[I + ':' + key];
 
-  if (! (I && HHK && i && i.alg && i.v && i.b && i.B && i.u && i.S)) {
-    delete sessions[I];
+  if (! (I && key && HHK && i && i.alg && i.v && i.b && i.B && i.u && i.S)) {
+    delete sessions[I + ':' + key];
     return res.json(400);
   }
 
@@ -134,7 +153,9 @@ exports.confirm = function(req, res) {
 
   var hhk = H(H(i.S.toBuffer()));
   if (hhk === HHK) {
-    return res.json(200, {challenge: H(i.S.toBuffer())});
+    res.json(200, {challenge: H(i.S.toBuffer())});
+  } else {
+    res.json(400);
   }
-  return res.json(400);
+  delete sessions[I + ':' + key];
 };

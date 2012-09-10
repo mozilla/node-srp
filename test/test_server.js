@@ -27,6 +27,7 @@ var a = 0;
 var A = 0;
 var B = 0;
 var S = 0;
+var session_id = '';
 
 vows.describe('server')
 
@@ -78,7 +79,9 @@ vows.describe('server')
           a = key;
           A = srp.getA(g, a, N);
           var uri = 'http://localhost:' + port + '/hello';
-          var data = {form: {identity: I, ephemeral_pubkey: A.toString(16)}};
+          var data = {form: {
+            identity: I,
+            ephemeral_pubkey: A.toString(16)}};
           request.post(uri, data, cb);
         });
       },
@@ -86,6 +89,9 @@ vows.describe('server')
       "exchange": function(err, res, body) {
         assert(err === null);
         assert(body === '200');
+
+        session_id = res.headers.session_id;
+        assert(!!session_id);
 
         s = res.headers.salt;
         B = bigint(res.headers.ephemeral_pubkey, 16);
@@ -98,7 +104,7 @@ vows.describe('server')
           S = srp.client_getS(s, I, P, N, g, a, B, ALG_NAME);
           var hhk = H(H(S.toBuffer()));
           var uri = 'http://localhost:' + port + '/confirm';
-          var data = {form: {identity: I, challenge: hhk}};
+          var data = {form: {identity: I, challenge: hhk, session_id: session_id}};
           request.post(uri, data, this.callback);
         },
 
