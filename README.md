@@ -1,3 +1,5 @@
+[![build status](https://secure.travis-ci.org/jedp/node-srp.png)](http://travis-ci.org/jedp/node-srp)
+
 #SRP - Secure Remote Password
 
 This is a work in progress.  I'm trying to figure some stuff out with it.
