@@ -5,6 +5,7 @@ const crypto = require('crypto'),
       S_BYTES = config.get('s_bytes'),
       db = require('../../lib/db'),
       srp = require('../../lib/srp');
+const fs = require('fs');
 
 var sessions = {};
 
@@ -44,16 +45,16 @@ exports.create = function(req, res) {
   var N_bits = req.body.N_bits;
   var alg = req.body.alg_name;
   if (! (I && v && s && N_bits && alg)) {
-    return res.json(400);
+    return res.json(400, {error: "create: Parameters missing from request"});
   }
 
   db.fetch(I, function(err, data) {
     // account exists?
-    if (data) return res.json(400);
+    if (data) return res.json(404, {error: "Not found"});
 
     db.store(I, {s: s, v: v, N_bits: N_bits, alg: alg}, function(err) {
       if (err) return res.json(500);
-      return res.json(200);
+      return res.json(200, {status: "OK"});
     });
   });
 };
@@ -78,27 +79,27 @@ exports.hello = function(req, res) {
   var A = bigint(req.body.ephemeral_pubkey, 16);
 
   if (! (I && A)) {
-    return res.json(400);
+    return res.json(400, {error: "hello: Parameters missing from request"});
   }
 
   db.fetch(I, function(err, data) {
     if (err || !data) {
       // 404 leaks info that identity does not have an account
       // error out with 500?  just as leaky?
-      return res.json(404);
+      return res.json(404, {error: "Not found"});
     }
 
-    var v = data.v;
-    var s = data.s;
+    var v = bigint(data.v, 16);
+    var s = new Buffer(data.s, 'utf-8');
     var N = params[data.N_bits].N;
     var g = params[data.N_bits].g;
     var alg = data.alg;
 
     srp.genKey(function(err, b) {
-      if (err) return res.json(500);
+      if (err) return res.json(500, {error: err});
 
       generateSessionId(function(err, key) {
-        if (err) return res.json(500);
+        if (err) return res.json(500, {error: err});
 
         var B = srp.getB(v, g, b, N, alg);
         var u = srp.getu(A, B, N, alg);
@@ -114,7 +115,7 @@ exports.hello = function(req, res) {
         };
 
         return res.json(200, {
-          salt: s,
+          salt: s.toString('utf-8'),
           ephemeral_pubkey: B.toString(16),
           session_id: key});
       });
@@ -143,19 +144,19 @@ exports.confirm = function(req, res) {
 
   if (! (I && key && HHK && i && i.alg && i.v && i.b && i.B && i.u && i.S)) {
     delete sessions[I + ':' + key];
-    return res.json(400);
+    return res.json(400, {error: "confirm: Parameters missing from request"});
   }
 
   // decode the challenge
-  function H (string_or_buf) {
+  function H(string_or_buf) {
     return crypto.createHash(i.alg).update(string_or_buf).digest('hex');
   }
 
-  var hhk = H(H(i.S.toBuffer()));
+  var hhk = H(H(i.S.toString(16)));
   if (hhk === HHK) {
-    res.json(200, {challenge: H(i.S.toBuffer())});
+    res.json(200, {challenge: H(i.S.toString(16))});
   } else {
-    res.json(400);
+    res.json(400, {error: "Challenge failed"});
   }
   delete sessions[I + ':' + key];
 };

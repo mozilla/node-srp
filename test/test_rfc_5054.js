@@ -8,8 +8,8 @@ const vows = require('vows'),
  * http://tools.ietf.org/html/rfc5054#appendix-B
  */
 
-const I = "alice",
-      P = "password123",
+const I = new Buffer("alice"),
+      P = new Buffer("password123"),
       s = bigint('BEB25379 D1A8581E B5A72767 3A2441EE', 16).toBuffer(),
       N = params['1024'].N,
       g = params['1024'].g,

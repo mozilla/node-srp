@@ -8,10 +8,12 @@ const vows = require('vows'),
       request = require('request'),
       app = require('../server/server');
 
-const I = "Kevin Phillips-Bong";
-const P = "slightly silly";
+const I = new Buffer("Kevin Phillips-Bong");
+const P = new Buffer("slightly silly");
 const ALG_NAME = 'sha256';
 const KEY_SIZE = '4096';
+const N = params[KEY_SIZE].N;
+const g = params[KEY_SIZE].g;
 const SALT_BYTES = 32;
 
 function H (string_or_buf) {
@@ -21,12 +23,11 @@ function H (string_or_buf) {
 // these variables will be modified by the tests below
 var port = 0;
 var s = '';
-var g = 0;
-var N = 0;
-var a = 0;
+var v = 0;
 var A = 0;
 var B = 0;
 var S = 0;
+var hhk = '';
 var session_id = '';
 
 vows.describe('server')
@@ -53,13 +54,15 @@ vows.describe('server')
       var cb = this.callback;
       var uri = 'http://localhost:' + port + '/create';
       // generate s and compute v; send to server
-      crypto.randomBytes(SALT_BYTES, function(err, buf) {
-        var N = params[KEY_SIZE].N;
-        var g = params[KEY_SIZE].g;
-        var s = bigint.fromBuffer(buf).toString(60);
-        var v = srp.getv(s, I, P, N, g, ALG_NAME).toString(16);
-        var data = {form: {identity: I, verifier: v, salt: s,
-                           alg_name: ALG_NAME, N_bits: KEY_SIZE}};
+      crypto.randomBytes(SALT_BYTES, function(err, salt) {
+        s = salt;
+        v = srp.getv(s, I, P, N, g, ALG_NAME);
+        var data = {form: {
+          identity: I.toString('utf-8'),
+          verifier: v.toString(16),
+          salt: s.toString('utf-8'),
+          alg_name: ALG_NAME,
+          N_bits: KEY_SIZE}};
         request.post(uri, data, cb);
       });
     },
@@ -80,7 +83,7 @@ vows.describe('server')
           A = srp.getA(g, a, N);
           var uri = 'http://localhost:' + port + '/hello';
           var data = {form: {
-            identity: I,
+            identity: I.toString('utf-8'),
             ephemeral_pubkey: A.toString(16)}};
           request.post(uri, data, cb);
         });
@@ -90,25 +93,30 @@ vows.describe('server')
         assert(err === null);
         assert(body === '200');
 
+        assert(!!res.headers.session_id);
         session_id = res.headers.session_id;
-        assert(!!session_id);
 
-        s = res.headers.salt;
+        assert(res.headers.salt == s.toString('utf-8'));
+
         B = bigint(res.headers.ephemeral_pubkey, 16);
-        assert(s);
-        assert(B);
+        assert(B.ne(0));
+        assert(B.ne(A));
       },
 
       "and session key": {
         topic: function() {
           S = srp.client_getS(s, I, P, N, g, a, B, ALG_NAME);
-          var hhk = H(H(S.toBuffer()));
+          hhk = H(H(S.toString(16)));
           var uri = 'http://localhost:' + port + '/confirm';
-          var data = {form: {identity: I, challenge: hhk, session_id: session_id}};
+          var data = {form: {
+            identity: I.toString('utf-8'), 
+            challenge: hhk, 
+            session_id: session_id}};
           request.post(uri, data, this.callback);
         },
 
         "is confirmed on the server for the client": function(err, res, body) {
+          console.log(res.statusCode, body, "res size: ", (JSON.stringify(res)).length);
           assert(err === null);
           assert(body === '200');
         },
@@ -118,7 +126,7 @@ vows.describe('server')
           assert(body === '200');
 
           var serverK = res.headers.challenge;
-          assert(serverK === H(S.toBuffer()));
+          assert(serverK === H(S.toString(16)));
         }
       }
 
