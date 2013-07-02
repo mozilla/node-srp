@@ -95,6 +95,11 @@ exports.hello = function(req, res) {
     var g = params[data.N_bits].g;
     var alg = data.alg;
 
+    if (A.mod(N).eq(0)) {
+      // Safeguard: The host will abort if it detects that A == 0 mod N
+      return res.json(400, {error: "A is congruent to 0 mod N"});
+    }
+
     srp.genKey(function(err, b) {
       if (err) return res.json(500, {error: err});
 
@@ -156,7 +161,10 @@ exports.confirm = function(req, res) {
   if (hhk === HHK) {
     res.json(200, {challenge: H(i.S.toString(16))});
   } else {
-    res.json(400, {error: "Challenge failed"});
+    // Safeguard: The user must show his own proof of K first.  If the server
+    // detects that the user's proof is incorrect, it must abort without
+    // showing its own proof of K.
+    res.json(400, {error: "We do not agree on the value of K"});
   }
   delete sessions[I + ':' + key];
 };
