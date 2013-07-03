@@ -116,7 +116,6 @@ vows.describe('server')
         },
 
         "is confirmed on the server for the client": function(err, res, body) {
-          console.log(res.statusCode, body, "res size: ", (JSON.stringify(res)).length);
           assert(err === null);
           assert(body === '200');
         },
@@ -125,8 +124,7 @@ vows.describe('server')
           assert(err === null);
           assert(body === '200');
 
-          var serverK = res.headers.challenge;
-          assert(serverK === H(S.toString(16)));
+          assert(res.headers.challenge === H(S.toString(16)));
         }
       }
 
