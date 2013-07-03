@@ -59,7 +59,6 @@ vows.describe('RFC 5054')
 
     "k": function() {
       assert(k_expected.eq(srp.getk(N, g, 'sha1')));
-
     },
 
     "A": function() {
