@@ -2,13 +2,10 @@
 
 #SRP - Secure Remote Password
 
-This is a work in progress.  I'm trying to figure some stuff out with it.
-
 Implementation of the [SRP Authentication and Key Exchange
 System](http://tools.ietf.org/html/rfc2945) and protocols in [Secure
 Remote Password (SRP) Protocol for TLS
-Authentication](http://tools.ietf.org/html/rfc5054) (including the
-test vectors in the latter).
+Authentication](http://tools.ietf.org/html/rfc5054)
 
 The goals are to provide at a minimum:
 
@@ -16,7 +13,9 @@ The goals are to provide at a minimum:
 - [done] SRP server
 - [done] SRP test client
 - SRP client lib for Node.js
-- JavaScript browser client
+- JavaScript browser client (maybe)
+- Interoperability with [Mozilla Identity-Attached
+  Services](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol)
 
 Additionally, I would like the API to provide:
 
@@ -29,19 +28,22 @@ Additionally, I would like the API to provide:
 [GNU libgmp](http://gmplib.org/) for those big big numbers.
 
 - debian: `libgmp3-dev`
-- brew: `gmp`
+- OSX brew: `gmp`
 
 ##Installation
 
-`git clone` this archive.
+`npm install srp`
 
-In the `node-srp` dir, run `npm install`.
+or `git clone` this archive and run `npm install` in it.
 
 ##Tests
 
-In the `node-srp` dir, run `npm test`.
+Run `npm test`.
 
-##Protocol
+Tests include the [RFC 5054 test
+vectors](https://tools.ietf.org/html/rfc5054#appendix-B).
+
+##Description of the Protocol
 
 ###Initial Setup
 
