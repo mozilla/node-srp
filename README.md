@@ -74,7 +74,7 @@ Client sends `I`, `A`.
 
 Steve looks up `v` and `s`.  Steve generates an ephemeral private key
 `b` and computes the public key `B` as `k * v + g^b % N`, where `k` is
-`H(PAD(g))`.  (`PAD` designates a function that left-pads a byte
+`H(N | PAD(g))`.  (`PAD` designates a function that left-pads a byte
 string with zeroes until it is the same size as `N`.)  Steve sends `s`
 and `B`.
 
@@ -126,7 +126,7 @@ can check if she wishes that she gets the same value.
 
 `v` the verifier
 
-`k` a multiplier
+`k` a multiplier, `H(N | PAD(g))`
 
 `u` a scrambling parameter
 
