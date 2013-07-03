@@ -49,11 +49,15 @@ vows.describe('RFC 5054')
       return srp.getv(s, I, P, N, g, 'sha1');
     },
 
+    "x": function() {
+      assert(x_expected.eq(srp.getx(s, I, P, 'sha1')));
+    },
+
     "V": function(v) {
       assert(v_expected.eq(v));
     },
 
-    "k": function(v) {
+    "k": function() {
       assert(k_expected.eq(srp.getk(N, g, 'sha1')));
 
     },
