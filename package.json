@@ -10,6 +10,15 @@
     "test": "vows test/*.js --spec"
   },
 
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jedp/node-srp"
+  },
+
+  "author": "Jed Parsons <jed@jedparsons.com>",
+  "licence": "MIT",
+  "readmeFilename": "README.md",
+
   "dependencies": {
     "bigint": "0.4.2",
     "convict": "0.0.6",
@@ -21,5 +30,5 @@
 
   "devDependencies": {
     "vows": "0.7.0"
-  } 
+  }
 }
