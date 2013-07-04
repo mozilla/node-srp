@@ -17,12 +17,6 @@ The goals are to provide at a minimum:
 - Interoperability with [Mozilla Identity-Attached
   Services](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol)
 
-Additionally, I would like the API to provide:
-
-- A way to bind messages of intent to the session key in a way that
-  preserves integrity, confidentiality, and protects against replay
-  attacks.
-
 ##Prerequisites
 
 [GNU libgmp](http://gmplib.org/) for those big big numbers.
@@ -40,8 +34,9 @@ or `git clone` this archive and run `npm install` in it.
 
 Run `npm test`.
 
-Tests include the [RFC 5054 test
-vectors](https://tools.ietf.org/html/rfc5054#appendix-B).
+Tests include vectors from:
+- [RFC 5054, Appendix B](https://tools.ietf.org/html/rfc5054#appendix-B).
+- [Mozilla Identity Attached Services](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol)
 
 ##Description of the Protocol
 
