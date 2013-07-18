@@ -1,7 +1,6 @@
 const vows = require('vows'),
       assert = require('assert'),
       bigint = require('bigint'),
-      Put = require('put'),
       params = require('../lib/params'),
       srp = require('../lib/srp');
 
@@ -28,7 +27,7 @@ const I = new Buffer('andré@example.org', 'utf8'),
                 +'72947679 88835942 53343430 84231300 63326063 44714480 99439808'
                 +'86106931 64826214 24231409 08830704 76916770 00983929 68117727'
                 +'43420990 99723875 98328292 19109897 32876428 83198548 78234173'
-                +'12772399 92628295 46938957 84583632 37146486 38545526 79918828' 
+                +'12772399 92628295 46938957 84583632 37146486 38545526 79918828'
                 +'02106605 08721582 00403102 62483181 55961400 94933216 29832845'
                 +'62611677 70805044 44704039 04739431 33561758 53336713 78812960', 10),
       a = bigint(' 1193346 47663227 29136311 34057412 43413916 43482736 31461660'
@@ -132,13 +131,13 @@ const I_hex =    '616e6472c3a9406578616d706c652e6f7267',
 function pad(s, margin) {
   margin = margin || 256;
   // We consistently zero-pad all string values to 256 bytes (2048 bits)
-  
+
   var padding = margin - (s.length % margin)
   var prefix = '';
   while (padding-- > 0) {
     prefix += '0';
   }
-  return prefix + s; 
+  return prefix + s;
 };
 
 vows.describe('picl vectors')
@@ -206,7 +205,7 @@ vows.describe('picl vectors')
         'K': function(S) {
           assert(srp.getK(S, ALG).toString(16) == K_hex);
         }
-        
+
       },
 
       'server': {
