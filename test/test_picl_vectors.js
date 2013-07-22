@@ -15,7 +15,7 @@ const vows = require('vows'),
 
 const I = new Buffer('andré@example.org', 'utf8'),
       P = new Buffer('pässwörd', 'utf8'),
-      P_stretch = new Buffer('5b597db713ef1c0567f8d053e9dde294f917a0a838ddb661a98a67a188bdf491', 'hex');
+      P_stretch = new Buffer('5b597db713ef1c0567f8d053e9dde294f917a0a838ddb661a98a67a188bdf491', 'hex'),
       N = params['2048'].N,
       g = params['2048'].g,
       s = new Buffer('00f100000000000000000000000000000000000000000000000000000000009b', 'hex'),
@@ -203,7 +203,7 @@ vows.describe('picl vectors')
         },
 
         'K': function(S) {
-          assert(srp.getK(S, ALG).toString(16) == K_hex);
+          assert(srp.getK(S, N, ALG).toString(16) == K_hex);
         }
 
       },
@@ -219,7 +219,7 @@ vows.describe('picl vectors')
         },
 
         'K': function(S) {
-          assert(srp.getK(S, ALG).toString(16) == K_hex);
+          assert(srp.getK(S, N, ALG).toString(16) == K_hex);
         }
       }
     }
