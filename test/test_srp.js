@@ -1,6 +1,5 @@
 const vows = require('vows'),
       assert = require('assert'),
-      bignum = require('bignum'),
       params = require('../lib/params'),
       srp = require('../lib/srp'),
       s = new Buffer("salty"),
@@ -20,11 +19,11 @@ vows.describe("srp.js")
 .addBatch({
   "getv": function() {
     v = srp.getv(s, I, P, N, g, ALG_NAME);
-    assert(v.bitLength() > 0);
+    assert(v.length > 0);
   },
 
   "getx": function() {
-    assert(srp.getx(s, I, P, ALG_NAME).bitLength() > 0);
+    assert(srp.getx(s, I, P, ALG_NAME).length > 0);
   },
 
   "with a": {
@@ -40,7 +39,7 @@ vows.describe("srp.js")
       assert(err === null);
 
       A = srp.getA(g, a, N);
-      assert(A.bitLength() > 0);
+      assert(A.length > 0);
     },
 
     "with b": {
@@ -56,22 +55,22 @@ vows.describe("srp.js")
         assert(err === null);
 
         B = srp.getB(v, g, b, N, ALG_NAME);
-        assert(B.bitLength() > 0);
+        assert(B.length > 0);
       },
 
       "getS": {
         "by client": function() {
           S_client = srp.client_getS(s, I, P, N, g, a, B, ALG_NAME);
-          assert(S_client.bitLength() > 0);
+          assert(S_client.length > 0);
         },
 
         "by server": function() {
           S_server = srp.server_getS(s, v, N, g, A, b, ALG_NAME);
-          assert(S_server.bitLength() > 0);
+          assert(S_server.length > 0);
         },
 
         "by client and server are equal": function() {
-          assert(S_server.eq(S_client));
+          assert.equal(S_server.toString('hex'), S_client.toString('hex'));
         }
       }
     }
