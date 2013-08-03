@@ -1,6 +1,6 @@
 const vows = require('vows'),
       assert = require('assert'),
-      bigint = require('bigint'),
+      bignum = require('bignum'),
       params = require('../lib/params'),
       srp = require('../lib/srp'),
       s = new Buffer("salty"),
@@ -34,7 +34,7 @@ vows.describe("srp.js")
         a = key;
         cb(err, a);
       });
-    }, 
+    },
 
     "getA": function(err, a) {
       assert(err === null);
@@ -51,7 +51,7 @@ vows.describe("srp.js")
           cb(err, b);
         });
       },
-      
+
       "getB": function(err, b) {
         assert(err === null);
 

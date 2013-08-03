@@ -20,11 +20,7 @@
   "readmeFilename": "README.md",
 
   "dependencies": {
-    "bigint": "0.4.2",
-    "convict": "0.0.6",
-    "express": "2.5.8",
-    "jade": "0.27.2",
-    "request": "2.11.1"
+    "bignum": "0.6.1"
   },
 
   "devDependencies": {
