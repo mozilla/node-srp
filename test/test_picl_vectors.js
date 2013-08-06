@@ -1,6 +1,6 @@
 const vows = require('vows'),
       assert = require('assert'),
-      bigint = require('bigint'),
+      bignum = require('bignum'),
       params = require('../lib/params'),
       srp = require('../lib/srp');
 
@@ -19,7 +19,7 @@ const I = new Buffer('andré@example.org', 'utf8'),
       N = params['2048'].N,
       g = params['2048'].g,
       s = new Buffer('00f100000000000000000000000000000000000000000000000000000000009b', 'hex'),
-      b = bigint(' 1198277 66042000 95785634 94115500 91527197 08125226 96054476'
+      b = bignum(('1198277 66042000 95785634 94115500 91527197 08125226 96054476'
                 +'89936430 95227800 29105361 55503035 27745056 25606029 71778328'
                 +'00325345 97331398 44872578 33596964 14341721 63891575 82554932'
                 +'02841499 37367218 83155342 80693274 23189198 73686357 51420460'
@@ -29,8 +29,8 @@ const I = new Buffer('andré@example.org', 'utf8'),
                 +'43420990 99723875 98328292 19109897 32876428 83198548 78234173'
                 +'12772399 92628295 46938957 84583632 37146486 38545526 79918828'
                 +'02106605 08721582 00403102 62483181 55961400 94933216 29832845'
-                +'62611677 70805044 44704039 04739431 33561758 53336713 78812960', 10),
-      a = bigint(' 1193346 47663227 29136311 34057412 43413916 43482736 31461660'
+                +'62611677 70805044 44704039 04739431 33561758 53336713 78812960').split(/\s/).join(''), 10).toBuffer(),
+      a = bignum(('1193346 47663227 29136311 34057412 43413916 43482736 31461660'
                 +'12200067 03889414 28162541 13710841 71663800 88052095 43910927'
                 +'47649109 98165425 61560345 50331133 01525500 56221240 12256352'
                 +'06121987 03057065 66763757 03406470 63422988 04247319 00591569'
@@ -40,7 +40,7 @@ const I = new Buffer('andré@example.org', 'utf8'),
                 +'50649711 19889621 34960686 05039486 22864591 67629830 47459546'
                 +'90086093 75374681 08474188 47198514 54277570 80362211 87408873'
                 +'99628800 12800917 05751238 00497654 06348391 06888223 63866455'
-                +'31489818 95205023 68799907 19946264 95152039 36244793 15530076', 10);
+                +'31489818 95205023 68799907 19946264 95152039 36244793 15530076').split(/\s/).join(''), 10).toBuffer();
       ALG = 'sha256';
 
 /* The constants below are the expected computed SRP values given the
@@ -49,10 +49,10 @@ const I = new Buffer('andré@example.org', 'utf8'),
 
 const I_hex =    '616e6472c3a9406578616d706c652e6f7267',
       P_hex =    '70c3a4737377c3b67264',
-      k = bigint('2590038599070950300691544216303772122846747035652616593381637186118123578112', 10),
+      k = bignum('2590038599070950300691544216303772122846747035652616593381637186118123578112', 10).toBuffer(),
       x_hex =    'ffd36e11f577d312892334810d55089cb96c39443c255a9d85874bb6df69a537',
-      x = bigint('115713340795669212831971819661984296758573939625477265918747447380376082294071', 10),
-      v = bigint('  710597 15947322 36316881 86192315 96014948 50266475 38798215'
+      x = bignum('115713340795669212831971819661984296758573939625477265918747447380376082294071', 10).toBuffer(),
+      v = bignum((' 710597 15947322 36316881 86192315 96014948 50266475 38798215'
                 +'26306672 64830126 91363325 46839100 25398380 39127254 13731153'
                 +'91662629 79482319 25131054 77620430 12038723 83833825 29286340'
                 +'32606803 60596134 07896556 96705692 35971894 13091525 11443851'
@@ -62,7 +62,7 @@ const I_hex =    '616e6472c3a9406578616d706c652e6f7267',
                 +'70781628 00905313 75741674 26864838 84981432 16212979 18109241'
                 +'15157063 80745962 22682772 15853248 49766449 08876686 42378825'
                 +'42044011 36102193 24427662 56173851 85761349 29894589 97367433'
-                +'46225452 67882212 38212661 40913290 18051354 03998520 50747986', 10),
+                +'46225452 67882212 38212661 40913290 18051354 03998520 50747986').split(/\s/).join(''), 10).toBuffer(),
       v_hex =   ('00901a4e 05a7986c fafe2c80 993f6e21 847d38b8 b9168065 14948072'
                 +'2d008c9a c5fe418d 799d03c2 b1c26db2 afcd4513 0a0601d3 10faa060'
                 +'cc728888 aba130a1 7d855773 107ecc92 f31ea3a3 838bc727 77fc2642'
@@ -145,81 +145,79 @@ vows.describe('picl vectors')
 .addBatch({
   'test vectors': {
     'I encoding': function() {
-      assert(I.toString('hex') == I_hex);
+      assert.equal(I.toString('hex'), I_hex);
     },
 
     'P encoding': function() {
-      assert(P.toString('hex') == P_hex);
+      assert.equal(P.toString('hex'), P_hex);
     },
 
     'k': function() {
-      assert(k.eq(srp.getk(N, g, ALG)));
+      assert.equal(srp.getk(N, g, ALG).toString('hex'), k.toString('hex'));
     },
 
     'x': function() {
-      assert(x.toString(16) == x_hex);
-      assert(srp.getx(s, I, P_stretch, ALG).eq(x));
+      assert.equal(srp.getx(s, I, P_stretch, ALG).toString('hex'), x_hex);
     },
 
     'v': function() {
-      assert(pad(v.toString(16)) == v_hex);
-      assert(srp.getv(s, I, P_stretch, N, g, ALG).eq(v));
+      assert.equal(pad(srp.getv(s, I, P_stretch, N, g, ALG).toString('hex')), v_hex);
     },
 
     'b': function() {
-      assert(pad(b.toString(16)) == b_hex);
+      assert.equal(pad(b.toString('hex')), b_hex);
     },
 
     'a': function() {
-      assert(pad(a.toString(16)) == a_hex);
+      assert.equal(pad(a.toString('hex')), a_hex);
     },
 
     'B': function() {
       var B = srp.getB(v, g, b, N, ALG);
-      assert(pad(B.toString(16)) == B_hex);
+      assert.equal(pad(B.toString('hex')), B_hex);
     },
 
     'A': function() {
       var A = srp.getA(g, a, N);
-      assert(pad(A.toString(16)) == A_hex);
+      assert.equal(pad(A.toString('hex')), A_hex);
     },
 
     'u': function() {
-      var A = bigint(A_hex, 16);
-      var B = bigint(B_hex, 16);
+      var A = Buffer(A_hex, 'hex');
+      var B = Buffer(B_hex, 'hex');
       var u = srp.getu(A, B, N, ALG);
-      assert(u.toString(16) == u_hex);
+      assert.equal(u.toString('hex'), u_hex);
     },
 
     'secrets': {
       'client': {
         topic: function() {
-          var B = bigint(B_hex, 16);
+          var B = Buffer(B_hex, 'hex');
           return srp.client_getS(s, I, P_stretch, N, g, a, B, ALG);
         },
 
         'S': function(S) {
-          assert(pad(S.toString(16)) == S_hex);
+          assert.equal(pad(S.toString('hex')), S_hex);
         },
 
         'K': function(S) {
-          assert(srp.getK(S, N, ALG).toString(16) == K_hex);
+          assert.equal(srp.getK(S, N, ALG).toString('hex'), K_hex);
         }
 
       },
 
       'server': {
         topic: function() {
-          var A = bigint(A_hex, 16);
+          var A = Buffer(A_hex, 'hex');
           return srp.server_getS(s, v, N, g, A, b, ALG);
         },
 
         'S': function(S) {
-          assert(pad(S.toString(16)) == S_hex);
+          assert.equal(pad(S.toString('hex')), S_hex);
         },
 
         'K': function(S) {
-          assert(srp.getK(S, N, ALG).toString(16) == K_hex);
+          assert.equal(srp.getK(S, N, ALG).toString('hex'), K_hex);
         }
       }
     }

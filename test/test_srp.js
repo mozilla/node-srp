@@ -1,6 +1,6 @@
 const vows = require('vows'),
       assert = require('assert'),
-      bigint = require('bigint'),
+      bignum = require('bignum'),
       params = require('../lib/params'),
       srp = require('../lib/srp'),
       s = new Buffer("salty"),
@@ -20,11 +20,11 @@ vows.describe("srp.js")
 .addBatch({
   "getv": function() {
     v = srp.getv(s, I, P, N, g, ALG_NAME);
-    assert(v.bitLength() > 0);
+    assert(v.length > 0);
   },
 
   "getx": function() {
-    assert(srp.getx(s, I, P, ALG_NAME).bitLength() > 0);
+    assert(srp.getx(s, I, P, ALG_NAME).length > 0);
   },
 
   "with a": {
@@ -34,13 +34,13 @@ vows.describe("srp.js")
         a = key;
         cb(err, a);
       });
-    }, 
+    },
 
     "getA": function(err, a) {
       assert(err === null);
 
       A = srp.getA(g, a, N);
-      assert(A.bitLength() > 0);
+      assert(A.length > 0);
     },
 
     "with b": {
@@ -51,28 +51,63 @@ vows.describe("srp.js")
           cb(err, b);
         });
       },
-      
+
       "getB": function(err, b) {
         assert(err === null);
 
         B = srp.getB(v, g, b, N, ALG_NAME);
-        assert(B.bitLength() > 0);
+        assert(B.length > 0);
       },
 
       "getS": {
         "by client": function() {
           S_client = srp.client_getS(s, I, P, N, g, a, B, ALG_NAME);
-          assert(S_client.bitLength() > 0);
+          assert(S_client.length > 0);
         },
 
         "by server": function() {
           S_server = srp.server_getS(s, v, N, g, A, b, ALG_NAME);
-          assert(S_server.bitLength() > 0);
+          assert(S_server.length > 0);
         },
 
         "by client and server are equal": function() {
-          assert(S_server.eq(S_client));
+          assert.equal(S_server.toString('hex'), S_client.toString('hex'));
+        },
+
+        "server rejects bad A": function() {
+          // client's "A" must be 1..N-1 . Reject 0 and N and 2*N.
+          var Azero = new Buffer(N.length);
+          Azero.fill(0, 0, N.length);
+          var AN = N;
+          var A2N = bignum.fromBuffer(N).mul(2).toBuffer();
+          assert.throws(function() {
+            srp.server_getS(s, v, N, g, Azero, b, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.server_getS(s, v, N, g, AN, b, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.server_getS(s, v, N, g, A2N, b, ALG_NAME);
+          }, Error);
+        },
+
+        "client rejects bad B": function() {
+          // server's "B" must be 1..N-1 . Reject 0 and N and 2*N.
+          var Bzero = new Buffer(N.length);
+          Bzero.fill(0, 0, N.length);
+          var BN = N;
+          var B2N = bignum.fromBuffer(N).mul(2).toBuffer();
+          assert.throws(function() {
+            srp.client_getS(s, I, P, N, g, a, Bzero, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.client_getS(s, I, P, N, g, a, BN, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.client_getS(s, I, P, N, g, a, B2N, ALG_NAME);
+          }, Error);
         }
+
       }
     }
   }
