@@ -72,7 +72,40 @@ vows.describe("srp.js")
 
         "by client and server are equal": function() {
           assert(S_server.eq(S_client));
+        },
+
+        "server rejects bad A": function() {
+          // client's "A" must be 1..N-1 . Reject 0 and N and 2*N.
+          var Azero = bigint("00", 16);
+          var AN = N;
+          var A2N = N.mul(2);
+          assert.throws(function() {
+            srp.server_getS(s, v, N, g, Azero, b, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.server_getS(s, v, N, g, AN, b, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.server_getS(s, v, N, g, A2N, b, ALG_NAME);
+          }, Error);
+        },
+
+        "client rejects bad B": function() {
+          // server's "B" must be 1..N-1 . Reject 0 and N and 2*N.
+          var Bzero = bigint("00", 16);
+          var BN = N;
+          var B2N = N.mul(2);
+          assert.throws(function() {
+            srp.client_getS(s, I, P, N, g, a, Bzero, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.client_getS(s, I, P, N, g, a, BN, ALG_NAME);
+          }, Error);
+          assert.throws(function() {
+            srp.client_getS(s, I, P, N, g, a, B2N, ALG_NAME);
+          }, Error);
         }
+
       }
     }
   }
