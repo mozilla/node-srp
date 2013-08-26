@@ -6,7 +6,7 @@
   "main": "index.js",
 
   "scripts": {
-    "test": "vows test/*.js --spec"
+    "test": "vows test/test*.js --spec"
   },
 
   "repository": {
@@ -19,7 +19,7 @@
   "readmeFilename": "README.md",
 
   "dependencies": {
-    "bigint": "0.4.2"
+    "bignum": "0.6.1"
   },
 
   "devDependencies": {
