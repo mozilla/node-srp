@@ -74,6 +74,13 @@ vows.describe("srp.js")
           assert.equal(S_server.toString('hex'), S_client.toString('hex'));
         },
 
+        "and K and M1 can be generated": function() {
+          var K = srp.getK(S_client, N, ALG_NAME);
+          var M1 = srp.getM(A, B, S_client, N, ALG_NAME);
+          assert(K.length > 0);
+          assert (M1.length > 0);
+        },
+
         "server rejects bad A": function() {
           // client's "A" must be 1..N-1 . Reject 0 and N and 2*N.
           var Azero = new Buffer(N.length);
