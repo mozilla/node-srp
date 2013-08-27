@@ -1,6 +1,6 @@
 const vows = require('vows'),
       assert = require('assert'),
-      bigint = require('bigint'),
+      bignum = require('bignum'),
       params = require('../lib/params'),
       srp = require('../lib/srp'),
       s = new Buffer("salty"),
@@ -34,7 +34,7 @@ vows.describe("srp.js")
         a = key;
         cb(err, a);
       });
-    }, 
+    },
 
     "getA": function(err, a) {
       assert(err === null);
@@ -51,7 +51,7 @@ vows.describe("srp.js")
           cb(err, b);
         });
       },
-      
+
       "getB": function(err, b) {
         assert(err === null);
 
@@ -76,7 +76,7 @@ vows.describe("srp.js")
 
         "server rejects bad A": function() {
           // client's "A" must be 1..N-1 . Reject 0 and N and 2*N.
-          var Azero = bigint("00", 16);
+          var Azero = bignum("00", 16);
           var AN = N;
           var A2N = N.mul(2);
           assert.throws(function() {
@@ -92,7 +92,7 @@ vows.describe("srp.js")
 
         "client rejects bad B": function() {
           // server's "B" must be 1..N-1 . Reject 0 and N and 2*N.
-          var Bzero = bigint("00", 16);
+          var Bzero = bignum("00", 16);
           var BN = N;
           var B2N = N.mul(2);
           assert.throws(function() {
