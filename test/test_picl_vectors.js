@@ -168,6 +168,10 @@ vows.describe('picl vectors')
           hexequal(buf2048(S), expected.S);
         },
 
+        'M': function(S) {
+          hexequal(srp.getM(expected.A, expected.B, S, params.N, ALG), expected.M1);
+        },
+
         'K': function(S) {
           hexequal(srp.getK(S, params.N, ALG), expected.K);
         }
@@ -181,6 +185,10 @@ vows.describe('picl vectors')
 
         'S': function(S) {
           hexequal(buf2048(S), expected.S);
+        },
+
+        'M': function(S) {
+          hexequal(srp.getM(expected.A, expected.B, S, params.N, ALG), expected.M1);
         },
 
         'K': function(S) {
