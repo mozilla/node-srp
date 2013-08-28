@@ -65,7 +65,7 @@ vows.describe("srp.js")
         },
 
         "by server": function() {
-          S_server = srp.server_getS(params, s, v, A, b);
+          S_server = srp.server_getS(params, v, A, b);
           assert(S_server.length > 0);
         },
 
@@ -87,13 +87,13 @@ vows.describe("srp.js")
           var AN = params.N.toBuffer();
           var A2N = params.N.mul(2).toBuffer();
           assert.throws(function() {
-            srp.server_getS(params, s, v, Azero, b);
+            srp.server_getS(params, v, Azero, b);
           }, Error);
           assert.throws(function() {
-            srp.server_getS(params, s, v, AN, b);
+            srp.server_getS(params, v, AN, b);
           }, Error);
           assert.throws(function() {
-            srp.server_getS(params, s, v, A2N, b);
+            srp.server_getS(params, v, A2N, b);
           }, Error);
         },
 

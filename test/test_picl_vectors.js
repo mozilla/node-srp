@@ -179,7 +179,7 @@ vows.describe('picl vectors')
 
       'server': {
         topic: function() {
-          return srp.server_getS(params, inputs.salt, expected.v, expected.A, inputs.b);
+          return srp.server_getS(params, expected.v, expected.A, inputs.b);
         },
 
         'S': function(S) {
