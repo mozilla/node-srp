@@ -1,6 +1,6 @@
 const vows = require('vows'),
       assert = require('assert'),
-      params = require('../lib/params'),
+      params = require('../lib/params')['1024'],
       srp = require('../lib/srp');
 
 /*
@@ -10,8 +10,6 @@ const vows = require('vows'),
 const I = new Buffer("alice"),
       P = new Buffer("password123"),
       s = Buffer('beb25379d1a8581eb5a727673a2441ee', 'hex'),
-      N = params['1024'].N,
-      g = params['1024'].g,
       k_expected = '7556aa045aef2cdd07abaf0f665c3e818913186f',
       x_expected = '94b7555aabe9127cc58ccf4993db6cf84d16c124',
       v_expected = ('7e273de8 696ffc4f 4e337d05 b4b375be b0dde156 9e8fa00a 9886d812'
@@ -45,11 +43,11 @@ vows.describe('RFC 5054')
 .addBatch({
   "Test vectors": {
     topic: function() {
-      return srp.getv(s, I, P, N, g, 'sha1');
+      return srp.getv(params, s, I, P);
     },
 
     "x": function() {
-      assert.equal(srp.getx(s, I, P, 'sha1').toString('hex'), x_expected);
+      assert.equal(srp.getx(params, s, I, P).toString('hex'), x_expected);
     },
 
     "V": function(v) {
@@ -57,37 +55,35 @@ vows.describe('RFC 5054')
     },
 
     "k": function() {
-      assert.equal(srp.getk(N, g, 'sha1').toString('hex'), k_expected);
+      assert.equal(srp.getk(params).toString('hex'), k_expected);
     },
 
     "A": function() {
-      assert.equal(srp.getA(g, a, N).toString('hex'), A_expected);
+      assert.equal(srp.getA(params, a).toString('hex'), A_expected);
     },
 
     "B": function(v) {
-      assert.equal(srp.getB(v, g, b, N, 'sha1').toString('hex'), B_expected);
+      assert.equal(srp.getB(params, v, b).toString('hex'), B_expected);
     },
 
     "u": function() {
       assert.equal(
-        srp.getu(
-          Buffer(A_expected, 'hex'),
-          Buffer(B_expected, 'hex'),
-          N,
-          'sha1'
+        srp.getu(params,
+                 Buffer(A_expected, 'hex'),
+                 Buffer(B_expected, 'hex')
         ).toString('hex'), u_expected);
     },
 
     "S client": function() {
       assert.equal(
-        srp.client_getS(s, I, P, N, g, a, Buffer(B_expected, 'hex'), 'sha1')
+        srp.client_getS(params, s, I, P, a, Buffer(B_expected, 'hex'))
           .toString('hex'),
         S_expected);
     },
 
     "S server": function(v) {
       assert.equal(
-        srp.server_getS(s, v, N, g, Buffer(A_expected, 'hex'), b, 'sha1')
+        srp.server_getS(params, s, v, Buffer(A_expected, 'hex'), b)
           .toString('hex'),
         S_expected);
     }

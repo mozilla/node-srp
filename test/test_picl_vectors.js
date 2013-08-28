@@ -38,7 +38,6 @@ function h(s) {
 }
 
 const params = require('../lib/params')['2048'];
-const ALG = 'sha256';
 const inputs = {
   I: new Buffer('andré@example.org', 'utf8'),
   P: h('00f9b71800ab5337 d51177d8fbc682a3 653fa6dae5b87628 eeec43a18af59a9d'),
@@ -132,36 +131,36 @@ vows.describe('picl vectors')
     },
 
     'getk': function() {
-      hexequal(srp.getk(params.N, params.g, ALG), expected.k);
+      hexequal(srp.getk(params), expected.k);
     },
 
     'getx': function() {
-      hexequal(srp.getx(inputs.salt, inputs.I, inputs.P, ALG), expected.x);
+      hexequal(srp.getx(params, inputs.salt, inputs.I, inputs.P), expected.x);
     },
 
     'getv': function() {
-      hexequal(buf2048(srp.getv(inputs.salt, inputs.I, inputs.P, params.N, params.g, ALG)), expected.v);
+      hexequal(buf2048(srp.getv(params, inputs.salt, inputs.I, inputs.P)), expected.v);
     },
 
     'getB (on server)': function() {
-      var B = srp.getB(expected.v, params.g, inputs.b, params.N, ALG);
+      var B = srp.getB(params, expected.v, inputs.b);
       hexequal(buf2048(B), expected.B);
     },
 
     'getA (on client)': function() {
-      var A = srp.getA(params.g, inputs.a, params.N);
+      var A = srp.getA(params, inputs.a);
       hexequal(buf2048(A), expected.A);
     },
 
     'getu': function() {
-      var u = srp.getu(expected.A, expected.B, params.N, ALG);
+      var u = srp.getu(params, expected.A, expected.B);
       hexequal(u, expected.u);
     },
 
     'secrets': {
       'client': {
         topic: function() {
-          return srp.client_getS(inputs.salt, inputs.I, inputs.P, params.N, params.g, inputs.a, expected.B, ALG);
+          return srp.client_getS(params, inputs.salt, inputs.I, inputs.P, inputs.a, expected.B);
         },
 
         'S': function(S) {
@@ -169,18 +168,18 @@ vows.describe('picl vectors')
         },
 
         'M': function(S) {
-          hexequal(srp.getM(expected.A, expected.B, S, params.N, ALG), expected.M1);
+          hexequal(srp.getM(params, expected.A, expected.B, S), expected.M1);
         },
 
         'K': function(S) {
-          hexequal(srp.getK(S, params.N, ALG), expected.K);
+          hexequal(srp.getK(params, S), expected.K);
         }
 
       },
 
       'server': {
         topic: function() {
-          return srp.server_getS(inputs.salt, expected.v, params.N, params.g, expected.A, inputs.b, ALG);
+          return srp.server_getS(params, inputs.salt, expected.v, expected.A, inputs.b);
         },
 
         'S': function(S) {
@@ -188,11 +187,11 @@ vows.describe('picl vectors')
         },
 
         'M': function(S) {
-          hexequal(srp.getM(expected.A, expected.B, S, params.N, ALG), expected.M1);
+          hexequal(srp.getM(params, expected.A, expected.B, S), expected.M1);
         },
 
         'K': function(S) {
-          hexequal(srp.getK(S, params.N, ALG), expected.K);
+          hexequal(srp.getK(params, S), expected.K);
         }
       }
     }
