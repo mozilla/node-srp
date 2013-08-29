@@ -12,21 +12,6 @@ const vows = require('vows'),
  * Note that P is the HKDF-stretched key, computed elsewhere.
  */
 
-function padbuf(b, LEN) {
-  assert(b.length <= LEN);
-  if (b.length != LEN) {
-    var newb = Buffer(LEN);
-    newb.fill(0);
-    b.copy(newb, LEN-b.length);
-    assert(newb.length == LEN);
-    b = newb;
-  }
-  return b;
-}
-function buf2048(b) {
-  return padbuf(b, 2048/8);
-}
-
 function join(s) {
   return s.split(/\s/).join('');
 }
@@ -139,17 +124,17 @@ vows.describe('picl vectors')
     },
 
     'getv': function() {
-      hexequal(buf2048(srp.getv(params, inputs.salt, inputs.I, inputs.P)), expected.v);
+      hexequal(srp.getv(params, inputs.salt, inputs.I, inputs.P), expected.v);
     },
 
     'getB (on server)': function() {
       var B = srp.getB(params, expected.v, inputs.b);
-      hexequal(buf2048(B), expected.B);
+      hexequal(B, expected.B);
     },
 
     'getA (on client)': function() {
       var A = srp.getA(params, inputs.a);
-      hexequal(buf2048(A), expected.A);
+      hexequal(A, expected.A);
     },
 
     'getu': function() {
@@ -164,7 +149,7 @@ vows.describe('picl vectors')
         },
 
         'S': function(S) {
-          hexequal(buf2048(S), expected.S);
+          hexequal(S, expected.S);
         },
 
         'M': function(S) {
@@ -183,7 +168,7 @@ vows.describe('picl vectors')
         },
 
         'S': function(S) {
-          hexequal(buf2048(S), expected.S);
+          hexequal(S, expected.S);
         },
 
         'M': function(S) {
