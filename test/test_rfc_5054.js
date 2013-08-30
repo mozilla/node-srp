@@ -83,7 +83,7 @@ vows.describe('RFC 5054')
 
     "S server": function(v) {
       assert.equal(
-        srp.server_getS(params, s, v, Buffer(A_expected, 'hex'), b)
+        srp.server_getS(params, v, Buffer(A_expected, 'hex'), b)
           .toString('hex'),
         S_expected);
     }
