@@ -11,13 +11,19 @@ SRP is an interactive protocol which allows a server to confirm that some client
 
 This module provides both client and server implementations of SRP-6a for node.js. They are interoperable with [Mozilla Identity-Attached Services](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol)
 
+* [Installation](#installation)
+* [Running Tests](#running-tests)
+* [Usage](#how-to-use-it)
+* [API Reference](#api-reference)
+* [Resources](#resources)
+
 ## Installation
 
 `npm install srp`
 
 or `git clone` this archive and run `npm install` in it.
 
-## Tests
+## Running Tests
 
 Run `npm test`.
 
@@ -108,19 +114,40 @@ The safest approach is to *create* a secure channel with the generated session k
 
 ## API Reference
 
-- **`params[]`**: table of parameter sets. Pass a property from this object into the Client and Server constructors.
-- **`genKey(numBytes, callback)`**: async function to generate the ephemeral secrets passed into the Client and Server constructors.
-- **`V = computeVerifier(params, salt, identity, password)`**: produces a Verifier, which should be given to the server during account creation. The Verifier will be passed into the Server constructor during login.
-- **`new Client(params, salt, identity, password, secret1)`**: constructor for the client-side of SRP. secret1 should come from genKey(). The Client object has the following methods:
- - **`A = c.computeA()`**: produce the A value that will be sent to the server.
- - **`c.setB(B)`**: this accepts the B value from the server. M1 and K cannot be accessed until setB() has been called.
- - **`M1 = c.computeM1()`**: produce the M1 key-confirmation message. This should be sent to the server, which can check it to make sure the client really knew the correct password. setB must be called before computeM1.
- - **`K = c.computeK()`**: produce the shared key K. If the password and verifier matched, both client and server will get the same value for K. setB must be called before computeK.
-- **`new Server(params, verifier, secret2)`**: constructor for the server-side of SRP. secret2 should come from genKey(). If the Server object must be persisted (e.g. in a database) between protocol phases, simply store secret2 and re-construct the Server with the same values. The Server object has the following methods:
- - **`B = s.computeB()`**: produce the B value that will be sent to the client.
- - **`s.setA(A)`**: this accepts the A value from the client. checkM1 and computeK cannot be called until setA has been called.
- - **`s.checkM1(M1)`**: this checks the client's M1 key-confirmation message. If the client's password matched the server's verifier, checkM1() will complete without error. If they do not match, checkM1() will throw an error.
- - **`s.computeK()`**: produce the shared key K. setB must be called before computeK.
+Module contents:
+
+- **`params[]`**
+ - table of parameter sets. Pass a property from this object into the Client and Server constructors.
+- **`genKey(numBytes, callback)`**
+ - async function to generate the ephemeral secrets passed into the Client and Server constructors.
+- **`computeVerifier(params, salt, identity, password) -> V`**
+ - produces a Verifier, which should be given to the server during account creation. The Verifier will be passed into the Server constructor during login.
+- **`Client(params, salt, identity, password, secret1) -> c`**
+ - constructor for the client-side of SRP. secret1 should come from genKey(). The Client object has the following methods:
+- **`Server(params, verifier, secret2) -> s`**
+ - constructor for the server-side of SRP. secret2 should come from genKey(). If the Server object must be persisted (e.g. in a database) between protocol phases, simply store secret2 and re-construct the Server with the same values. The Server object has the following methods:
+
+`Client` methods:
+
+- **`computeA() -> A`**
+ - produce the A value that will be sent to the server.
+- **`setB(B)`**
+ - this accepts the B value from the server. M1 and K cannot be accessed until setB() has been called.
+- **`computeM1() -> M1`**
+ - produce the M1 key-confirmation message. This should be sent to the server, which can check it to make sure the client really knew the correct password. setB must be called before computeM1.
+- **`computeK() -> K`**
+ - produce the shared key K. If the password and verifier matched, both client and server will get the same value for K. setB must be called before computeK.
+
+`Server` methods:
+
+- **`computeB() -> B`**
+ - produce the B value that will be sent to the client.
+- **`setA(A)`**
+ - this accepts the A value from the client. checkM1 and computeK cannot be called until setA has been called.
+- **`checkM1(M1)`**
+ - this checks the client's M1 key-confirmation message. If the client's password matched the server's verifier, checkM1() will complete without error. If they do not match, checkM1() will throw an error.
+- **`computeK() -> K`**
+ - produce the shared key K. setB must be called before computeK.
 
 ## Resources
 
