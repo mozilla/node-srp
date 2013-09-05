@@ -1,36 +1,29 @@
 [![build status](https://secure.travis-ci.org/jedp/node-srp.png)](http://travis-ci.org/jedp/node-srp)
 
-#SRP - Secure Remote Password
+# SRP - Secure Remote Password
 
 Implementation of the [SRP Authentication and Key Exchange
 System](http://tools.ietf.org/html/rfc2945) and protocols in [Secure
 Remote Password (SRP) Protocol for TLS
 Authentication](http://tools.ietf.org/html/rfc5054)
 
-The goals are to provide at a minimum:
+SRP is an interactive protocol which allows a server to confirm that some client knows a password, and to derive a strong shared session key, without revealing what the password is to an eavesdropper. In addition, the server does not hold the actual password: instead it stores a "verifier" created by the client. If the server's private data is revealed (by a server compromise), the verifier cannot be used directly to impersonate the client.
 
-- [done] SRP function library that passes [RFC 5054 tests](http://tools.ietf.org/html/rfc5054#appendix-B)
-- [done] SRP server
-- [done] SRP test client
-- SRP client lib for Node.js
-- JavaScript browser client (maybe)
-- Interoperability with [Mozilla Identity-Attached
-  Services](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol)
+This module provides both client and server implementations of SRP-6a for node.js. They are interoperable with [Mozilla Identity-Attached Services](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol)
 
-##Prerequisites
+* [Installation](#installation)
+* [Running Tests](#running-tests)
+* [Usage](#how-to-use-it)
+* [API Reference](#api-reference)
+* [Resources](#resources)
 
-[GNU libgmp](http://gmplib.org/) for those big big numbers.
-
-- debian: `libgmp3-dev`
-- OSX brew: `gmp`
-
-##Installation
+## Installation
 
 `npm install srp`
 
 or `git clone` this archive and run `npm install` in it.
 
-##Tests
+## Running Tests
 
 Run `npm test`.
 
@@ -38,116 +31,131 @@ Tests include vectors from:
 - [RFC 5054, Appendix B](https://tools.ietf.org/html/rfc5054#appendix-B).
 - [Mozilla Identity Attached Services](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol)
 
-##Description of the Protocol
+## How to use it
 
-###Initial Setup
+First, you must decide on the "parameters". This module provides a variety of pre-packaged parameter sets, at various levels of security (more secure parameters take longer to run). The "2048"-bit parameters are probably fairly secure for the near future. Both client and server must use the same parameters.
 
-Carol the Client wants to share messages with Steve the server.
-Before this can happen, they need to perform a one-time setup step.
+    var params = srp.params["2048"];
 
-Carol and Steve agree on a large random number `N` and a generator
-`g`.  These can be published in advance or better yet hard-coded in
-their implementations.  They also agree on a cryptographic hashing
-function `H`.
+Each client will have a unique "identity" string. This is typically a username or email address. Clients will also use a unique "salt", which can be randomly generated during account creation. The salt is generally stored on the server, and must be provided to the client each time they try to connect.
 
-Carol establishes a password and remembers it well.  She the generates
-some random salt, `s`, and compputes the verifier `v` as `g ^ H(s |
-H(I | ':' | P)) % N`, where `I` is Carol's identity, and `|` denotes
-concatenation.
+Note that all APIs accept and return node.js Buffer objects, not strings.
 
-Carol then sends Steve `I`, `s`, and `v`.  She also sends the size of
-`N` and the name of the hashing algorithm she has chosen.
+### Client Setup: Account Creation
 
-Steve stores `I`, `s`, and `v`.  Carol remembers `P`.  This sequence
-is performed once, after which Carol and Steve can use the SRP
-protocol to share messages.
+The client feeds their identity string, password, and salt, into `computeVerifier`. This returns the Verifier buffer. The Verifier must be delivered to the server, typically during a "create account" process. Note that the Verifier can be used to mount a dictionary attack against the user's password, so it should be treated with care (and delivered securely to the server).
 
-###Message Protocol
+    var verifier = srp.computeVerifier(params, salt, identity, password);
+    createAccount(identity, verifier);
 
-First, Carol generates an ephemeral private key `a`.  She computes the
-public key `A` as `g^a % N`.  She sends Steve `I` and `A`.
+The server should store the identity, salt, and verifier in a table, indexed by the identity for later access. The server will provide the salt to anyone who asks, but should never reveal the verifier to anybody.
 
-Client sends `I`, `A`.
+### Login
 
-Steve looks up `v` and `s`.  Steve generates an ephemeral private key
-`b` and computes the public key `B` as `k * v + g^b % N`, where `k` is
-`H(N | PAD(g))`.  (`PAD` designates a function that left-pads a byte
-string with zeroes until it is the same size as `N`.)  Steve sends `s`
-and `B`.
+Later, when the client wants to connect to the server, it starts by submitting its identity string, and retrieving the salt.
 
-Server replies with `s` and `B`.
+Then the client needs to create a secret random string called `secret1`, using `srp.genKey()`. The protocol uses this to make sure that each instance of the protocol is unique.
 
-Both now compute the scrambling parameter `u` as `u = H(PAD(A) | PAD(B))`.
+Then, create a new `srp.Client` instance with parameters, identity, salt, password, and `secret1`.
 
-Now both Carol and Steve have the parameters they need to compute
-their session key, `S`.
+The client must then ask this object for the derived `srpA` value, and deliver srpA to the server.
 
-For Carol, the formula is:
+    srp.genKey(function(secret1) {
+        var c = new srp.Client(params, salt, identity, password, secret1);
+        var srpA = c.computeA();
+        sendToServer(srpA);
+    });
 
-```
-S_client = (B - k * g^x) ^ (a + u * x)
-```
+Meanwhile, the server is doing something similar, except using the Verifier instead of the salt/identity/password, and using its own secret random string.
 
-For Steve, the formula is:
+    srp.genKey(function(secret2) {
+        var s = new srp.Server(params, verifier, secret2);
+        var srpB = s.computeB();
+        sendToClient(srpB);
+    });
 
-```
-S_server = (A * v ^ u) ^ b
-```
+When the client receives the server's `srpB` value, it stuffs it into the Client instance. This allows it to extract two values: `M1` and `K`.
 
-They both now compute the shared session key, `K`, as `H(S)`.  (The
-hash is taken to obscure any structure that may be visible in `S`.)
+    c.setB(srpB);
+    var M1 = c.computeM1();
+    sendToServer(M1);
+    var K = c.computeK();
 
-Now Carol and Steve must convince each other that their values for `K`
-match.  Here, Carol hashes and hashes again her session key and sends
-it to Steve.  If he gets the same result when hashing his session key
-twice, he hashes his session key once and sends it back to Carol, who
-can check if she wishes that she gets the same value.
+`M1` is a challenge value, created by the client and delivered to the server. After accepting the client's `A` value, the server can check `M1` to determine whether or not the client really knew the password. The server can also obtain its own `K` value.
 
-###Glossary of Terms
+    s.setA(srpA)
+    s.checkM1(M1); // throws error if wrong
+    var K = s.computeK();
 
-`N` a large prime number
+If the password passed into `srp.Client()` is the same as the one passed into `srp.computeVerifier()`, then the server will accept `M1`, and the `K` on both sides will be the same.
 
-`g` a generator
+`K` is a strong random string, suitable for use as a session key to encrypt or authenticate subsequent messages.
 
-`H` a secure hashing function
+If the password was different, then `s.checkM1()` will throw an error, and the two `K` values will be unrelated random strings.
 
-`|` the concatenation operator
+The overall conversation looks like this:
 
-`PAD` a function that left-pads a block of bytes with zeroes until it is the same length as `N`
+    Client:                             Server:
+     p = params["2048"]                  p = params["2048"]
+     s1 = genKey()                       s2 = genKey()
+     c = new Client(p,salt,id,pw,s1)     s = new Server(p,verifier,s2)
+     A = c.computeA()            A---->  s.setA(A)
+     c.setB(B)                <-----B    B = s.computeB()
+     M1 = c.computeM1()         M1---->  s.checkM1(M1) // may throw error
+     K = c.computeK()                    K = s.computeK()
 
-`I` the identity of the client (a string)
+### What a "Session" Means
 
-`P` the password of the client (a string)
+Basic login can be done by simply calling `s.checkM1()`: if it doesn't throw an exception, the client knew the right password. However, by itself, this does not bind knowledge of the password to anything else. If the A/B/M1 values were delivered over an insecure channel, controlled by an attacker, they could simply wait until `M1` was accepted, and then take control of the channel.
 
-`s` some random salt (a string)
+Delivering these values over a secure channel, such as an HTTPS connection, is better. If the HTTP client correctly checks the server certificate, and the certificate was correctly issued, then you can exclude a man-in-the-middle attacker.
 
-`v` the verifier
+The safest approach is to *create* a secure channel with the generated session key `K`, using it to encrypt and authenticate all the messages which follow.
 
-`k` a multiplier, `H(N | PAD(g))`
+## API Reference
 
-`u` a scrambling parameter
+Module contents:
 
-`a` an ephemeral private key known to the client
+- **`params[]`**
+ - table of parameter sets. Pass a property from this object into the Client and Server constructors.
+- **`genKey(numBytes, callback)`**
+ - async function to generate the ephemeral secrets passed into the Client and Server constructors.
+- **`computeVerifier(params, salt, identity, password) -> V`**
+ - produces a Verifier, which should be given to the server during account creation. The Verifier will be passed into the Server constructor during login.
+- **`Client(params, salt, identity, password, secret1) -> c`**
+ - constructor for the client-side of SRP. secret1 should come from genKey(). The Client object has the following methods:
+- **`Server(params, verifier, secret2) -> s`**
+ - constructor for the server-side of SRP. secret2 should come from genKey(). If the Server object must be persisted (e.g. in a database) between protocol phases, simply store secret2 and re-construct the Server with the same values. The Server object has the following methods:
 
-`A` the public key from `a`
+`Client` methods:
 
-`b` an ephemeral private key known to the server
+- **`computeA() -> A`**
+ - produce the A value that will be sent to the server.
+- **`setB(B)`**
+ - this accepts the B value from the server. M1 and K cannot be accessed until setB() has been called.
+- **`computeM1() -> M1`**
+ - produce the M1 key-confirmation message. This should be sent to the server, which can check it to make sure the client really knew the correct password. setB must be called before computeM1.
+- **`computeK() -> K`**
+ - produce the shared key K. If the password and verifier matched, both client and server will get the same value for K. setB must be called before computeK.
 
-`B` the public key from `b`
+`Server` methods:
 
-`x` an intermediate value, `H(s | H(I | ":" | P))`
+- **`computeB() -> B`**
+ - produce the B value that will be sent to the client.
+- **`setA(A)`**
+ - this accepts the A value from the client. checkM1 and computeK cannot be called until setA has been called.
+- **`checkM1(M1)`**
+ - this checks the client's M1 key-confirmation message. If the client's password matched the server's verifier, checkM1() will complete without error. If they do not match, checkM1() will throw an error.
+- **`computeK() -> K`**
+ - produce the shared key K. setB must be called before computeK.
 
-`S` the session key
-
-`K` a hash of the session key shared between client and server
-
-##Resources
+## Resources
 
 - [The Stanford SRP Homepage](http://srp.stanford.edu/)
 - RFC 2945: [The SRP Authentication and Key Exchange System](http://tools.ietf.org/html/rfc2945)
 - RFC 5054: [Using the Secure Remote Password (SRP) Protocol for TLS Authentication](http://tools.ietf.org/html/rfc5054)
 - Wikipedia: [The Secure Remote Password protocol](http://en.wikipedia.org/wiki/Secure_Remote_Password_protocol)
 
-##License
+## License
 
 MIT

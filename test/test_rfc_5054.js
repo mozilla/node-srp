@@ -1,7 +1,7 @@
 const vows = require('vows'),
       assert = require('assert'),
-      params = require('../lib/params')['1024'],
-      srp = require('../lib/srp');
+      srp = require('../lib/srp'),
+      params = srp.params['1024'];
 
 /*
  * http://tools.ietf.org/html/rfc5054#appendix-B
@@ -38,16 +38,21 @@ const I = new Buffer("alice"),
                    +'3499b200 210dcc1f 10eb3394 3cd67fc8 8a2f39a4 be5bec4e c0a3212d'
                    +'c346d7e4 74b29ede 8a469ffe ca686e5a').split(/\s/).join('');
 
+function asHex(num) {
+  return num.toBuffer().toString('hex');
+}
+
 vows.describe('RFC 5054')
 
 .addBatch({
   "Test vectors": {
     topic: function() {
-      return srp.getv(params, s, I, P);
+      return srp.computeVerifier(params, s, I, P);
     },
 
     "x": function() {
-      assert.equal(srp.getx(params, s, I, P).toString('hex'), x_expected);
+      var client = new srp.Client(params, s, I, P, a);
+      assert.equal(asHex(client._private.x_num), x_expected);
     },
 
     "V": function(v) {
@@ -55,37 +60,36 @@ vows.describe('RFC 5054')
     },
 
     "k": function() {
-      assert.equal(srp.getk(params).toString('hex'), k_expected);
+      var client = new srp.Client(params, s, I, P, a);
+      assert.equal(asHex(client._private.k_num), k_expected);
     },
 
     "A": function() {
-      assert.equal(srp.getA(params, a).toString('hex'), A_expected);
+      var client = new srp.Client(params, s, I, P, a);
+      assert.equal(client.computeA().toString('hex'), A_expected);
     },
 
     "B": function(v) {
-      assert.equal(srp.getB(params, v, b).toString('hex'), B_expected);
+      var server = new srp.Server(params, v, b);
+      assert.equal(server.computeB().toString('hex'), B_expected);
     },
 
     "u": function() {
-      assert.equal(
-        srp.getu(params,
-                 Buffer(A_expected, 'hex'),
-                 Buffer(B_expected, 'hex')
-        ).toString('hex'), u_expected);
+      var client = new srp.Client(params, s, I, P, a);
+      client.setB(Buffer(B_expected, 'hex'));
+      assert.equal(asHex(client._private.u_num), u_expected);
     },
 
     "S client": function() {
-      assert.equal(
-        srp.client_getS(params, s, I, P, a, Buffer(B_expected, 'hex'))
-          .toString('hex'),
-        S_expected);
+      var client = new srp.Client(params, s, I, P, a);
+      client.setB(Buffer(B_expected, 'hex'));
+      assert.equal(client._private.S_buf.toString('hex'), S_expected);
     },
 
     "S server": function(v) {
-      assert.equal(
-        srp.server_getS(params, v, Buffer(A_expected, 'hex'), b)
-          .toString('hex'),
-        S_expected);
+      var server = new srp.Server(params, v, b);
+      server.setA(Buffer(A_expected, 'hex'));
+      assert.equal(server._private.S_buf.toString('hex'), S_expected);
     }
   }
 })
