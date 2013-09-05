@@ -47,7 +47,7 @@ vows.describe('RFC 5054')
 .addBatch({
   "Test vectors": {
     topic: function() {
-      return srp.makeVerifier(params, s, I, P);
+      return srp.computeVerifier(params, s, I, P);
     },
 
     "x": function() {
@@ -66,12 +66,12 @@ vows.describe('RFC 5054')
 
     "A": function() {
       var client = new srp.Client(params, s, I, P, a);
-      assert.equal(client.getA().toString('hex'), A_expected);
+      assert.equal(client.computeA().toString('hex'), A_expected);
     },
 
     "B": function(v) {
       var server = new srp.Server(params, v, b);
-      assert.equal(server.getB().toString('hex'), B_expected);
+      assert.equal(server.computeB().toString('hex'), B_expected);
     },
 
     "u": function() {

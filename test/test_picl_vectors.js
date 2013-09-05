@@ -266,26 +266,26 @@ function numequal(a, b, msg) {
 
 function checkVectors(params, inputs, expected) {
   hexequal(inputs.I, new Buffer('616e6472c3a9406578616d706c652e6f7267', "hex"), "I");
-  hexequal(srp.makeVerifier(params, inputs.salt, inputs.I, inputs.P), expected.v, "v");
+  hexequal(srp.computeVerifier(params, inputs.salt, inputs.I, inputs.P), expected.v, "v");
 
   var client = new srp.Client(params, inputs.salt, inputs.I, inputs.P, inputs.a);
   var server = new srp.Server(params, expected.v, inputs.b);
 
   numequal(client._private.k_num, bignum.fromBuffer(expected.k), "k");
   numequal(client._private.x_num, bignum.fromBuffer(expected.x), "x");
-  hexequal(client.getA(), expected.A);
-  hexequal(server.getB(), expected.B);
+  hexequal(client.computeA(), expected.A);
+  hexequal(server.computeB(), expected.B);
 
-  assert.throws(function() {client.getM1();}, /incomplete protocol/);
-  assert.throws(function() {client.getK();}, /incomplete protocol/);
+  assert.throws(function() {client.computeM1();}, /incomplete protocol/);
+  assert.throws(function() {client.computeK();}, /incomplete protocol/);
   assert.throws(function() {server.checkM1(expected.M1);}, /incomplete protocol/);
-  assert.throws(function() {server.getK();}, /incomplete protocol/);
+  assert.throws(function() {server.computeK();}, /incomplete protocol/);
 
   client.setB(expected.B);
   numequal(client._private.u_num, bignum.fromBuffer(expected.u));
   hexequal(client._private.S_buf, expected.S);
-  hexequal(client.getM1(), expected.M1);
-  hexequal(client.getK(), expected.K);
+  hexequal(client.computeM1(), expected.M1);
+  hexequal(client.computeK(), expected.K);
 
   server.setA(expected.A);
   numequal(server._private.u_num, bignum.fromBuffer(expected.u));
@@ -293,7 +293,7 @@ function checkVectors(params, inputs, expected) {
   assert.throws(function() {server.checkM1(Buffer("notM1"));},
                 /client did not use the same password/);
   server.checkM1(expected.M1); // happy, not throwy
-  hexequal(server.getK(), expected.K);
+  hexequal(server.computeK(), expected.K);
 }
 
 vows.describe('picl vectors')
