@@ -71,6 +71,40 @@ vows.describe("srp.js")
 
     },
 
+    "constructor doesn't require 'new'": function() {
+      client = srp.Client(params, salt, identity, password, a);
+
+      // client produces A
+      A = client.computeA();
+
+      // create server
+      server = srp.Server(params, verifier, b);
+
+      // server produces B
+      B = server.computeB();
+
+      // server accepts A
+      server.setA(A);
+
+      // client doesn't produce M1 too early
+      assert.throws(function(){client.computeM1();}, /incomplete protocol/);
+
+      // client accepts B
+      client.setB(B);
+
+      // client produces M1 now
+      client.computeM1();
+
+      // server likes client's M1
+      server.checkM1(client.computeM1());
+
+      // client and server agree on K
+      var client_K = client.computeK();
+      var server_K = server.computeK();
+      assert.equal(client_K.toString("hex"), server_K.toString("hex"));
+
+    },
+
     "server rejects wrong M1": function() {
       var bad_client = new srp.Client(params, salt, identity, Buffer("bad"), a);
       var server2 = new srp.Server(params, verifier, b);
