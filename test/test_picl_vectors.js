@@ -22,7 +22,7 @@ function h(s) {
   return new Buffer(join(s), 'hex');
 }
 
-const params = require('../lib/params')['2048'];
+const params = srp.params['2048'];
 
 /* inputs_1/expected_1 are the main PiCl test vectors. They were mechanically
  * generated to force certain derived values (stretched-password "P", v, A,
@@ -260,26 +260,40 @@ function hexequal(a, b, msg) {
   assert.equal(a.toString('hex'), b.toString('hex'), msg);
 }
 
+function numequal(a, b, msg) {
+  assert(a.eq(b), msg);
+}
+
 function checkVectors(params, inputs, expected) {
   hexequal(inputs.I, new Buffer('616e6472c3a9406578616d706c652e6f7267', "hex"), "I");
-  hexequal(srp.getk(params), expected.k, "k");
-  hexequal(srp.getx(params, inputs.salt, inputs.I, inputs.P), expected.x, "x");
-  hexequal(srp.getv(params, inputs.salt, inputs.I, inputs.P), expected.v, "v");
+  hexequal(srp.computeVerifier(params, inputs.salt, inputs.I, inputs.P), expected.v, "v");
 
-  var B = srp.getB(params, expected.v, inputs.b);
-  hexequal(B, expected.B, "B on server");
-  var A = srp.getA(params, inputs.a);
-  hexequal(A, expected.A, "A on client");
-  var u = srp.getu(params, expected.A, expected.B);
-  hexequal(u, expected.u, "u");
+  var client = new srp.Client(params, inputs.salt, inputs.I, inputs.P, inputs.a);
+  var server = new srp.Server(params, expected.v, inputs.b);
 
-  var S = srp.client_getS(params, inputs.salt, inputs.I, inputs.P, inputs.a, expected.B);
-  hexequal(S, expected.S, "S on client");
-  S = srp.server_getS(params, expected.v, expected.A, inputs.b);
-  hexequal(S, expected.S, "S on server");
+  numequal(client._private.k_num, bignum.fromBuffer(expected.k), "k");
+  numequal(client._private.x_num, bignum.fromBuffer(expected.x), "x");
+  hexequal(client.computeA(), expected.A);
+  hexequal(server.computeB(), expected.B);
 
-  hexequal(srp.getM(params, expected.A, expected.B, S), expected.M1, "M1");
-  hexequal(srp.getK(params, S), expected.K, "K");
+  assert.throws(function() {client.computeM1();}, /incomplete protocol/);
+  assert.throws(function() {client.computeK();}, /incomplete protocol/);
+  assert.throws(function() {server.checkM1(expected.M1);}, /incomplete protocol/);
+  assert.throws(function() {server.computeK();}, /incomplete protocol/);
+
+  client.setB(expected.B);
+  numequal(client._private.u_num, bignum.fromBuffer(expected.u));
+  hexequal(client._private.S_buf, expected.S);
+  hexequal(client.computeM1(), expected.M1);
+  hexequal(client.computeK(), expected.K);
+
+  server.setA(expected.A);
+  numequal(server._private.u_num, bignum.fromBuffer(expected.u));
+  hexequal(server._private.S_buf, expected.S);
+  assert.throws(function() {server.checkM1(Buffer("notM1"));},
+                /client did not use the same password/);
+  server.checkM1(expected.M1); // happy, not throwy
+  hexequal(server.computeK(), expected.K);
 }
 
 vows.describe('picl vectors')
