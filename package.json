@@ -1,7 +1,7 @@
 {
   "name": "srp",
   "description": "Secure Remote Password (SRP)",
-  "version": "0.0.4",
+  "version": "0.2.0",
 
   "main": "index.js",
 
@@ -11,10 +11,10 @@
 
   "repository": {
     "type": "git",
-    "url": "https://github.com/jedp/node-srp"
+    "url": "https://github.com/mozilla/node-srp"
   },
 
-  "author": "Jed Parsons <jed@jedparsons.com>",
+  "author": "Brian Warner <warner-node-srp@lothar.com>",
   "licence": "MIT",
   "readmeFilename": "README.md",
 
