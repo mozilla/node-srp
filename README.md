@@ -147,7 +147,7 @@ Module contents:
 - **`checkM1(M1)`**
  - this checks the client's M1 key-confirmation message. If the client's password matched the server's verifier, checkM1() will complete without error. If they do not match, checkM1() will throw an error.
 - **`computeK() -> K`**
- - produce the shared key K. setB must be called before computeK.
+ - produce the shared key K. setA must be called before computeK.
 
 ## Resources
 
