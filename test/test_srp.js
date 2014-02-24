@@ -62,13 +62,15 @@ vows.describe("srp.js")
       client.computeM1();
 
       // server likes client's M1
-      server.checkM1(client.computeM1());
+      serverM2 = server.checkM1(client.computeM1());
 
       // client and server agree on K
       var client_K = client.computeK();
       var server_K = server.computeK();
       assert.equal(client_K.toString("hex"), server_K.toString("hex"));
 
+      // server is authentic
+      assert.doesNotThrow(function(){client.checkM2(serverM2);}, "M2 didn't check");
     },
 
     "constructor doesn't require 'new'": function() {
@@ -96,13 +98,15 @@ vows.describe("srp.js")
       client.computeM1();
 
       // server likes client's M1
-      server.checkM1(client.computeM1());
+      serverM2 = server.checkM1(client.computeM1());
 
       // client and server agree on K
       var client_K = client.computeK();
       var server_K = server.computeK();
       assert.equal(client_K.toString("hex"), server_K.toString("hex"));
 
+      // server is authentic
+      assert.doesNotThrow(function(){client.checkM2(serverM2);}, "M2 didn't check");
     },
 
     "server rejects wrong M1": function() {
@@ -144,6 +148,41 @@ vows.describe("srp.js")
                     /invalid server-supplied 'B'/);
       assert.throws(function() {client2.setB(BN1);},
                     /invalid server-supplied 'B'/);
+    },
+
+    "client rejects bad M2": function() {
+      client = srp.Client(params, salt, identity, password, a);
+
+      // client produces A
+      A = client.computeA();
+
+      // create server
+      server = srp.Server(params, verifier, b);
+
+      // server produces B
+      B = server.computeB();
+
+      // server accepts A
+      server.setA(A);
+
+      // client accepts B
+      client.setB(B);
+
+      // client produces M1 now
+      client.computeM1();
+
+      // server likes client's M1
+      serverM2 = server.checkM1(client.computeM1());
+      // we tamper with the server's M2
+      serverM2 = serverM2 + "a";
+
+      // client and server agree on K
+      var client_K = client.computeK();
+      var server_K = server.computeK();
+      assert.equal(client_K.toString("hex"), server_K.toString("hex"));
+
+      // server is NOT authentic
+      assert.throws(function(){client.checkM2(serverM2);}, "M2 didn't check");
     },
   }
 
