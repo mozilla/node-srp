@@ -62,7 +62,7 @@ vows.describe("srp.js")
       client.computeM1();
 
       // server likes client's M1
-      serverM2 = server.checkM1(client.computeM1());
+      var serverM2 = server.checkM1(client.computeM1());
 
       // client and server agree on K
       var client_K = client.computeK();
@@ -172,7 +172,7 @@ vows.describe("srp.js")
       client.computeM1();
 
       // server likes client's M1
-      serverM2 = server.checkM1(client.computeM1());
+      var serverM2 = server.checkM1(client.computeM1());
       // we tamper with the server's M2
       serverM2 = serverM2 + "a";
 
