@@ -2,6 +2,7 @@ const vows = require('vows'),
       assert = require('assert'),
       srp = require('../lib/srp'),
       params = srp.params[4096],
+      Buffer = require('../lib/buffer'),
 
       salt = new Buffer("salty"),
       identity = new Buffer("alice"),
