@@ -12,3 +12,6 @@ node_modules
 
 # awsbox setup notes
 awsbox_notes.txt
+
+.idea
+yarn-error.log
