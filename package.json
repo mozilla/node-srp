@@ -2,27 +2,21 @@
   "name": "srp",
   "description": "Secure Remote Password (SRP)",
   "version": "0.2.0",
-
   "main": "index.js",
-
   "scripts": {
     "test": "vows test/test*.js --spec"
   },
-
   "repository": {
     "type": "git",
     "url": "https://github.com/mozilla/node-srp"
   },
-
   "author": "Brian Warner <warner-node-srp@lothar.com>",
-  "licence": "MIT",
+  "license": "MIT",
   "readmeFilename": "README.md",
-
   "dependencies": {
-    "bignum": "0.9.2"
+    "bignum": "^0.13.1"
   },
-
   "devDependencies": {
-    "vows": "0.7.0"
+    "vows": "^0.8.3"
   }
 }
