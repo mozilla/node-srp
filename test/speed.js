@@ -1,4 +1,4 @@
-const params = require('../lib/params'),
+const {params} = require('../lib/params'),
       srp = require('../lib/srp'),
       s = new Buffer("salty"),
       I = new Buffer("alice"),

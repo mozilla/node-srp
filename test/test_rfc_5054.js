@@ -1,7 +1,7 @@
 const vows = require('vows'),
       assert = require('assert'),
       srp = require('../lib/srp'),
-      params = srp.params['1024'];
+      params = srp.params[1024];
 
 /*
  * http://tools.ietf.org/html/rfc5054#appendix-B

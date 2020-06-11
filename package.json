@@ -17,6 +17,9 @@
     "bignum": "^0.13.1"
   },
   "devDependencies": {
+    "@types/bignum": "^0.0.29",
+    "benchmark": "^2.1.4",
+    "typescript": "^3.9.5",
     "vows": "^0.8.3"
   }
 }

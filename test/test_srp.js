@@ -74,13 +74,13 @@ vows.describe("srp.js")
     },
 
     "constructor doesn't require 'new'": function() {
-      client = srp.Client(params, salt, identity, password, a);
+      client = new srp.Client(params, salt, identity, password, a);
 
       // client produces A
       A = client.computeA();
 
       // create server
-      server = srp.Server(params, verifier, b);
+      server = new srp.Server(params, verifier, b);
 
       // server produces B
       B = server.computeB();
@@ -151,13 +151,13 @@ vows.describe("srp.js")
     },
 
     "client rejects bad M2": function() {
-      client = srp.Client(params, salt, identity, password, a);
+      client = new srp.Client(params, salt, identity, password, a);
 
       // client produces A
       A = client.computeA();
 
       // create server
-      server = srp.Server(params, verifier, b);
+      server = new srp.Server(params, verifier, b);
 
       // server produces B
       B = server.computeB();

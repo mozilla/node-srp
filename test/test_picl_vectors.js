@@ -22,7 +22,7 @@ function h(s) {
   return new Buffer(join(s), 'hex');
 }
 
-const params = srp.params['2048'];
+const params = srp.params[2048];
 
 /* inputs_1/expected_1 are the main PiCl test vectors. They were mechanically
  * generated to force certain derived values (stretched-password "P", v, A,

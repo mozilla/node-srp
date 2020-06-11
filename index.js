@@ -1,3 +1,3 @@
-module.exports = require('./lib/srp');
+module.exports = require('./src/srp');
 
-module.exports.params = require('./lib/params');
+module.exports.params = require('./src/params');
